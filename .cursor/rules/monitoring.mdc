@@ -1,0 +1,416 @@
+---
+description: 企业级监控系统构建指南
+globs: ["**/*.java", "**/*.ts", "**/*.vue", "**/*.js", "**/*.xml", "**/*.yml"]
+alwaysApply: true
+---
+# 企业级监控系统构建规则
+
+// 版本信息
+版本: v1.2
+创建日期: 2024-04-11
+更新日期: 2024-05-17
+作者: Cursor 中文社区
+
+// 角色定位
+你是一位专注于构建企业级监控系统的专家。
+你擅长设计可扩展、高可用的监控架构。
+你注重系统的实时性、准确性和可维护性。
+
+// 总体架构
+系统采用分层架构设计，包括：
+- 数据采集层
+- 数据处理层
+- 数据存储层
+- 应用服务层
+- 展示层
+
+// 核心组件及服务功能
+1. 资产管理服务
+   - 资产注册中心
+     * 设备自动发现与注册
+     * 资产分类与标签管理
+   - 资产配置管理
+     * 资产基础信息维护
+     * 监控配置管理
+   - 资产拓扑管理
+     * 资产关系建模
+     * 拓扑展示与导航
+
+2. 数据采集服务
+   - 采集任务调度器
+     * 任务分发与调度
+     * 采集频率动态调整
+   - 多协议采集器
+     * 支持SNMP/JMX/HTTP/TCP等多种协议
+     * 支持主动采集与被动接收
+   - Agent管理中心
+     * Agent生命周期管理
+     * Agent配置下发
+
+3. 数据处理服务
+   - 数据过滤器
+     * 数据有效性验证
+     * 异常数据过滤
+   - 数据转换器
+     * 数据格式规范化
+     * 数据单位转换
+   - 数据聚合计算引擎
+     * 多维度数据聚合
+     * 复杂指标计算
+   - 告警规则引擎
+     * 阈值检测
+     * 趋势分析
+     * 模式识别
+
+4. 存储服务
+   - 时序数据库
+     * 高性能数据写入
+     * 快速时间范围查询
+   - 关系数据库
+     * 配置信息存储
+     * 元数据管理
+   - 缓存服务
+     * 热点数据缓存
+     * 查询结果缓存
+
+5. 告警服务
+   - 告警生成器
+     * 告警触发条件评估
+     * 告警信息生成
+   - 告警路由器
+     * 告警分级路由
+     * 告警升级策略
+   - 告警通知中心
+     * 多渠道告警通知(邮件/短信/企业微信/钉钉/电话)
+     * 告警确认与处理跟踪
+
+6. 可视化服务
+   - 监控面板引擎
+     * 实时监控大屏
+     * 自定义仪表盘
+   - 报表生成器
+     * 定时报表生成
+     * 多格式导出支持
+   - 数据展示API
+     * 开放数据接口
+     * 第三方集成支持
+
+7. 安全与权限服务
+   - 认证中心
+     * 用户身份认证
+     * SSO单点登录
+   - 授权管理
+     * 基于角色的访问控制
+     * 细粒度权限管理
+   - 审计日志
+     * 操作审计
+     * 安全事件记录
+
+// 监控对象
+1. 服务器监控
+   - CPU使用率
+   - 内存使用率
+   - 磁盘使用率
+   - 网络流量
+   - 系统负载
+
+2. 中间件监控
+   - 数据库（MySQL, PostgreSQL, MongoDB等）
+   - 消息队列（RabbitMQ, Kafka等）
+   - 缓存（Redis, Memcached等）
+   - Web服务器（Nginx, Apache等）
+
+3. 应用监控
+   - 接口响应时间
+   - 错误率
+   - 并发数
+   - 业务指标
+
+// 告警机制
+1. 告警级别
+   - 严重（Critical）
+   - 警告（Warning）
+   - 提示（Info）
+
+2. 告警方式
+   - 邮件通知
+   - 短信通知
+   - 企业微信/钉钉
+   - 电话告警
+
+3. 告警规则
+   - 阈值告警
+   - 趋势告警
+   - 组合告警
+   - 智能告警
+
+// 技术栈选型
+1. 后端技术栈
+   - 编程语言：Java(主体)，Python(辅助脚本)
+   - 微服务框架：Spring Boot/Spring Cloud
+   - 数据库：InfluxDB(时序数据)，MySQL(关系数据)，Redis(缓存)
+   - 消息队列：Kafka
+   - 服务注册与发现：Nacos
+   - 任务调度：XXL-Job
+
+2. 前端技术栈
+   - 框架：Vue.js 3
+   - UI组件：Element Plus
+   - 图表库：ECharts
+   - 状态管理：Pinia
+
+// 性能要求
+1. 数据采集
+   - 支持每秒百万级数据点
+   - 采集延迟<1秒
+   - 支持断点续传
+
+2. 数据处理
+   - 实时计算延迟<5秒
+   - 支持复杂计算规则
+   - 支持数据降采样
+
+3. 存储
+   - 支持PB级数据存储
+   - 数据保留策略可配置
+   - 支持数据压缩
+
+// 安全要求
+1. 认证授权
+   - 支持多租户
+   - 基于角色的访问控制
+   - 操作审计日志
+
+2. 数据安全
+   - 数据传输加密
+   - 数据存储加密
+   - 敏感信息脱敏
+
+// 扩展性要求
+1. 插件机制
+   - 支持自定义采集器
+   - 支持自定义告警规则
+   - 支持自定义展示面板
+
+2. API接口
+   - RESTful API
+   - WebSocket实时数据
+   - 数据导出接口
+
+// 部署架构
+1. 环境要求
+   - 基于Kubernetes容器化部署
+   - 支持水平扩展的微服务集群
+   - 多地域数据中心支持
+   - 高可用设计(无单点故障)
+
+2. 资源要求
+   - CPU：8核以上
+   - 内存：16GB以上
+   - 存储：根据数据量配置
+
+// 实施路线
+1. 第一阶段：基础设施搭建
+   - 部署Kubernetes集群
+   - 部署基础中间件
+   - 构建CI/CD流水线
+
+2. 第二阶段：核心功能实现
+   - 资产管理模块
+   - 基础数据采集
+   - 简单告警功能
+
+3. 第三阶段：功能完善与扩展
+   - 高级告警能力
+   - 复杂指标计算
+   - 丰富的可视化
+   - API开放
+
+4. 第四阶段：性能优化与稳定性提升
+   - 系统性能调优
+   - 高可用性保障
+   - 容量规划与扩展
+
+@Docs{
+  "type": "monitoring",
+  "version": "latest",
+  "language": "中文"
+} 
+
+总体项目结构
+skyi-monitor/
+├── docs/                              # 项目文档
+├── docker/                            # Docker配置文件
+├── kubernetes/                        # K8s部署配置
+├── infrastructure/                    # 基础设施代码
+├── microservices/                     # 微服务模块
+│   ├── asset-service/                 # 资产管理服务
+│   ├── collector-service/             # 数据采集服务
+│   ├── processor-service/             # 数据处理服务
+│   ├── storage-service/               # 存储服务
+│   ├── alert-service/                 # 告警服务
+│   ├── visualization-service/         # 可视化服务
+│   └── auth-service/                  # 安全与权限服务
+├── frontend/                          # 前端项目
+├── common/                            # 公共组件
+├── agent/                             # 监控代理程序
+└── scripts/                           # 构建部署脚本
+
+2. 微服务模块结构
+2.1 资产管理服务 (asset-service)
+asset-service/
+├── src/main/java/com/skyi/asset/
+│   ├── controller/                    # 接口控制器
+│   ├── service/                       # 业务逻辑
+│   │   ├── registry/                  # 资产注册中心
+│   │   ├── config/                    # 资产配置管理
+│   │   └── topology/                  # 资产拓扑管理
+│   ├── repository/                    # 数据访问层
+│   ├── model/                         # 数据模型
+│   ├── dto/                           # 数据传输对象
+│   └── utils/                         # 工具类
+├── src/main/resources/                # 配置文件
+└── src/test/                          # 测试代码
+2.2 数据采集服务 (collector-service)
+collector-service/
+├── src/main/java/com/skyi/collector/
+│   ├── controller/                    # 接口控制器
+│   ├── service/                       # 业务逻辑
+│   │   ├── scheduler/                 # 采集任务调度器
+│   │   ├── protocol/                  # 多协议采集器
+│   │   └── agent/                     # Agent管理中心
+│   ├── repository/                    # 数据访问层
+│   ├── model/                         # 数据模型
+│   ├── dto/                           # 数据传输对象
+│   └── utils/                         # 工具类
+├── src/main/resources/                # 配置文件
+└── src/test/                          # 测试代码
+2.3 数据处理服务 (processor-service)
+processor-service/
+├── src/main/java/com/skyi/processor/
+│   ├── controller/                    # 接口控制器
+│   ├── service/                       # 业务逻辑
+│   │   ├── filter/                    # 数据过滤器
+│   │   ├── transformer/               # 数据转换器
+│   │   ├── aggregator/                # 数据聚合计算引擎
+│   │   └── rule/                      # 告警规则引擎
+│   ├── repository/                    # 数据访问层
+│   ├── model/                         # 数据模型
+│   ├── dto/                           # 数据传输对象
+│   └── utils/                         # 工具类
+├── src/main/resources/                # 配置文件
+└── src/test/                          # 测试代码
+2.4 存储服务 (storage-service)
+storage-service/
+├── src/main/java/com/skyi/storage/
+│   ├── controller/                    # 接口控制器
+│   ├── service/                       # 业务逻辑
+│   │   ├── timeseries/                # 时序数据库服务
+│   │   ├── relational/                # 关系数据库服务
+│   │   └── cache/                     # 缓存服务
+│   ├── repository/                    # 数据访问层
+│   ├── model/                         # 数据模型
+│   ├── dto/                           # 数据传输对象
+│   └── utils/                         # 工具类
+├── src/main/resources/                # 配置文件
+└── src/test/                          # 测试代码
+2.5 告警服务 (alert-service)
+alert-service/
+├── src/main/java/com/skyi/alert/
+│   ├── controller/                    # 接口控制器
+│   ├── service/                       # 业务逻辑
+│   │   ├── generator/                 # 告警生成器
+│   │   ├── router/                    # 告警路由器
+│   │   └── notification/              # 告警通知中心
+│   ├── repository/                    # 数据访问层
+│   ├── model/                         # 数据模型
+│   ├── dto/                           # 数据传输对象
+│   └── utils/                         # 工具类
+├── src/main/resources/                # 配置文件
+└── src/test/                          # 测试代码
+2.6 可视化服务 (visualization-service)
+visualization-service/
+├── src/main/java/com/skyi/visualization/
+│   ├── controller/                    # 接口控制器
+│   ├── service/                       # 业务逻辑
+│   │   ├── dashboard/                 # 监控面板引擎
+│   │   ├── report/                    # 报表生成器
+│   │   └── api/                       # 数据展示API
+│   ├── repository/                    # 数据访问层
+│   ├── model/                         # 数据模型
+│   ├── dto/                           # 数据传输对象
+│   └── utils/                         # 工具类
+├── src/main/resources/                # 配置文件
+└── src/test/                          # 测试代码
+2.7 安全与权限服务 (auth-service)
+auth-service/
+├── src/main/java/com/skyi/auth/
+│   ├── controller/                    # 接口控制器
+│   ├── service/                       # 业务逻辑
+│   │   ├── authentication/            # 认证中心
+│   │   ├── authorization/             # 授权管理
+│   │   └── audit/                     # 审计日志
+│   ├── repository/                    # 数据访问层
+│   ├── model/                         # 数据模型
+│   ├── dto/                           # 数据传输对象
+│   └── utils/                         # 工具类
+├── src/main/resources/                # 配置文件
+└── src/test/                          # 测试代码
+3. 前端项目结构
+frontend/
+├── public/                            # 静态资源
+├── src/
+│   ├── api/                           # 接口请求
+│   ├── assets/                        # 资源文件
+│   ├── components/                    # 公共组件
+│   │   ├── asset/                     # 资产管理组件
+│   │   ├── collector/                 # 采集管理组件 
+│   │   ├── dashboard/                 # 监控面板组件
+│   │   ├── alert/                     # 告警组件
+│   │   └── common/                    # 通用组件
+│   ├── views/                         # 页面视图
+│   │   ├── asset/                     # 资产管理页面
+│   │   ├── collector/                 # 采集管理页面
+│   │   ├── dashboard/                 # 监控面板页面
+│   │   ├── alert/                     # 告警管理页面
+│   │   ├── report/                    # 报表管理页面
+│   │   └── system/                    # 系统管理页面
+│   ├── router/                        # 路由配置
+│   ├── store/                         # 状态管理
+│   ├── utils/                         # 工具函数
+│   ├── plugins/                       # 插件配置
+│   └── App.vue                        # 根组件
+├── package.json                       # 依赖配置
+└── vite.config.js                     # 构建配置
+4. 代理程序结构
+agent/
+├── src/
+│   ├── collector/                     # 数据采集模块
+│   │   ├── os/                        # 操作系统监控
+│   │   ├── database/                  # 数据库监控
+│   │   ├── middleware/                # 中间件监控
+│   │   └── application/               # 应用监控
+│   ├── processor/                     # 本地处理模块
+│   ├── transport/                     # 数据传输模块
+│   └── config/                        # 配置管理模块
+├── package.json                       # 依赖配置
+└── Dockerfile                         # 容器构建配置
+5. 公共组件结构
+common/
+├── model/                             # 公共模型
+├── utils/                             # 公共工具
+├── constants/                         # 常量定义
+└── exception/                         # 异常处理
+6. 基础设施代码结构
+infrastructure/
+├── database/
+│   ├── influxdb/                      # 时序数据库配置
+│   ├── mysql/                         # 关系数据库配置
+│   └── redis/                         # 缓存配置
+├── mq/
+│   └── kafka/                         # 消息队列配置
+├── registry/
+│   └── nacos/                         # 服务注册与发现配置
+├── scheduler/
+│   └── xxl-job/                       # 任务调度配置
+└── gateway/                           # API网关配置

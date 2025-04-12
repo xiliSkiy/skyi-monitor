@@ -1,0 +1,93 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: collector-service
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/skyi_collector?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+  
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: collector-service
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.skyi.collector.dto,com.skyi.common.model
+
+# XXL-JOB配置
+xxl:
+  job:
+    admin:
+      addresses: http://localhost:8080/xxl-job-admin
+    executor:
+      appname: collector-service-executor
+      ip: 
+      port: 9999
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+
+# 采集器配置
+collector:
+  # 服务器采集配置
+  server:
+    enabled: true
+    protocols:
+      - snmp
+      - ssh
+    defaultInterval: 60  # 默认采集间隔(秒)
+  
+  # 数据库采集配置
+  database:
+    enabled: true
+    protocols:
+      - jdbc
+    defaultInterval: 300  # 默认采集间隔(秒)
+  
+  # 中间件采集配置
+  middleware:
+    enabled: true
+    protocols:
+      - http
+      - jmx
+    defaultInterval: 120  # 默认采集间隔(秒)
+  
+  # 应用采集配置
+  application:
+    enabled: true
+    protocols:
+      - http
+      - prometheus
+    defaultInterval: 60  # 默认采集间隔(秒)
+
+# 日志配置
+logging:
+  level:
+    com.skyi: info
+    org.hibernate.SQL: debug 

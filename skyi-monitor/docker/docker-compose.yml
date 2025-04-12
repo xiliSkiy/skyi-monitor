@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # 数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: skyi-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: skyi_asset
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - skyi-net
+
+  # 缓存服务
+  redis:
+    image: redis:6.2
+    container_name: skyi-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - skyi-net
+
+  # 时序数据库服务
+  influxdb:
+    image: influxdb:2.6
+    container_name: skyi-influxdb
+    restart: always
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=Skyi@Influx2024
+      - DOCKER_INFLUXDB_INIT_ORG=skyi
+      - DOCKER_INFLUXDB_INIT_BUCKET=monitoring
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=skyi-token
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    networks:
+      - skyi-net
+
+  # 服务注册与配置中心
+  nacos:
+    image: nacos/nacos-server:v2.2.0
+    container_name: skyi-nacos
+    restart: always
+    environment:
+      - MODE=standalone
+      - PREFER_HOST_MODE=hostname
+    ports:
+      - "8848:8848"
+    networks:
+      - skyi-net
+
+  # Zookeeper服务
+  zookeeper:
+    image: zookeeper:3.7
+    container_name: skyi-zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    networks:
+      - skyi-net
+
+  # Kafka服务
+  kafka:
+    image: confluentinc/cp-kafka:7.0.0
+    container_name: skyi-kafka
+    restart: always
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - skyi-net
+
+networks:
+  skyi-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  influxdb-data: 

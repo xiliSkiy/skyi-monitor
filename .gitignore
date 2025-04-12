@@ -1,0 +1,46 @@
+# 编译输出
+target/
+build/
+dist/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE文件
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+*.swp
+*.swo
+
+# 日志文件
+logs/
+*.log
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 配置文件（可能包含敏感信息）
+# 如果需要上传配置文件模板，请使用 *.properties.example 等
+# application-prod.yml
+# application-dev.yml
+
+# 依赖目录
+node_modules/
+.gradle/
+
+# 其他
+.env
+*.bak 
