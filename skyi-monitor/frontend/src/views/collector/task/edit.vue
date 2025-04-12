@@ -311,7 +311,7 @@ const saveTask = async () => {
 
 // 返回列表
 const goBack = () => {
-  router.push('/collector/task/list')
+  router.push('/collector/task')
 }
 
 onMounted(() => {
