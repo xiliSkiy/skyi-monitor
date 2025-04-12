@@ -41,6 +41,17 @@ docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS s
 docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_alert DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_auth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
+# 初始化数据库表结构
+echo "初始化数据库表结构..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# 拷贝SQL初始化脚本到容器
+docker cp "${SCRIPT_DIR}/init-collector-db.sql" skyi-mysql:/tmp/init-collector-db.sql
+
+# 执行SQL初始化脚本
+docker exec skyi-mysql mysql -uroot -p123456 -e "source /tmp/init-collector-db.sql"
+
 # 启动Redis
 echo "启动Redis..."
 docker run -d --name skyi-redis \
