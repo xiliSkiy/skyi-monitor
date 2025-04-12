@@ -28,9 +28,18 @@ docker run -d --name skyi-mysql \
   --network skyi-net \
   -p 3306:3306 \
   -e MYSQL_ROOT_PASSWORD=123456 \
-  -e MYSQL_DATABASE=skyi_asset \
-  -v mysql-data:/var/lib/mysql \
   mysql:8.0
+
+# 等待MySQL启动完成
+echo "等待MySQL启动完成..."
+sleep 10
+
+# 创建所需的数据库
+echo "创建数据库..."
+docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_asset DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_collector DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_alert DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_auth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # 启动Redis
 echo "启动Redis..."
