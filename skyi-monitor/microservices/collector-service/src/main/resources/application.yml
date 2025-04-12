@@ -44,6 +44,7 @@ spring:
 # XXL-JOB配置
 xxl:
   job:
+    enabled: false  # 禁用XXL-Job
     admin:
       addresses: http://localhost:8080/xxl-job-admin
     executor:

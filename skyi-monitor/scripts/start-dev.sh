@@ -40,6 +40,7 @@ docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS s
 docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_collector DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_alert DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_auth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS xxl_job DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # 初始化数据库表结构
 echo "初始化数据库表结构..."
@@ -97,6 +98,14 @@ docker run -d --name skyi-kafka \
   -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
   -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
   confluentinc/cp-kafka:7.0.0
+
+# 启动XXL-Job调度中心
+echo "启动XXL-Job调度中心..."
+docker run -d --name skyi-xxl-job-admin \
+  --network skyi-net \
+  -p 8080:8080 \
+  -e PARAMS="--spring.datasource.url=jdbc:mysql://skyi-mysql:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai --spring.datasource.username=root --spring.datasource.password=123456" \
+  xuxueli/xxl-job-admin:2.3.1
 
 echo "基础设施服务启动完成！"
 echo "请等待所有服务就绪后再启动应用服务..." 
