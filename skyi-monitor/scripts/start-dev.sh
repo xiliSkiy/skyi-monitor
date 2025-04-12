@@ -32,15 +32,17 @@ docker run -d --name skyi-mysql \
 
 # 等待MySQL启动完成
 echo "等待MySQL启动完成..."
-sleep 10
+sleep 20
 
 # 创建所需的数据库
 echo "创建数据库..."
-docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_asset DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_collector DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_alert DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS skyi_auth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-docker exec skyi-mysql mysql -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS xxl_job DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker exec -i skyi-mysql sh -c 'exec mysql -uroot -p"123456"' << EOF
+CREATE DATABASE IF NOT EXISTS skyi_asset DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS skyi_collector DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS skyi_alert DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS skyi_auth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS xxl_job DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+EOF
 
 # 初始化数据库表结构
 echo "初始化数据库表结构..."
@@ -51,7 +53,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 docker cp "${SCRIPT_DIR}/init-collector-db.sql" skyi-mysql:/tmp/init-collector-db.sql
 
 # 执行SQL初始化脚本
-docker exec skyi-mysql mysql -uroot -p123456 -e "source /tmp/init-collector-db.sql"
+docker exec -i skyi-mysql sh -c 'exec mysql -uroot -p"123456" < /tmp/init-collector-db.sql'
 
 # 启动Redis
 echo "启动Redis..."
