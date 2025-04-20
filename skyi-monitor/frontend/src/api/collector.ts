@@ -1,13 +1,12 @@
 import request from '@/utils/request'
+import type { ApiResponse, PaginationResult } from '@/types/api'
+import type { CollectorTask } from '@/types/collector'
 import {
-  CollectorTask,
   CollectorTaskSchedule,
   CollectorTaskInstance,
   CollectorMetricData,
-  CollectorTaskQueryParams,
   CollectorScheduleQueryParams
 } from '@/types/collector'
-import { ApiResponse, PaginationResult } from '@/types/asset'
 
 /**
  * 创建采集任务
@@ -39,10 +38,10 @@ export function updateCollectorTask(id: number, data: CollectorTask) {
 /**
  * 删除采集任务
  * @param id 任务ID
- * @returns 
+ * @returns 操作结果
  */
 export function deleteCollectorTask(id: number) {
-  return request<ApiResponse<null>>({
+  return request({
     url: `/collector/tasks/${id}`,
     method: 'delete'
   })
@@ -61,12 +60,25 @@ export function getCollectorTaskById(id: number) {
 }
 
 /**
- * 分页查询采集任务列表
+ * 查询采集任务列表
+ */
+export interface CollectorTaskQueryParams {
+  name?: string;
+  type?: string;
+  protocol?: string;
+  status?: number | null;
+  assetId?: number;
+  page?: number;
+  size?: number;
+}
+
+/**
+ * 查询采集任务列表
  * @param params 查询参数
- * @returns 
+ * @returns 任务列表
  */
 export function listCollectorTasks(params: CollectorTaskQueryParams) {
-  return request<ApiResponse<PaginationResult<CollectorTask>>>({
+  return request({
     url: '/collector/tasks',
     method: 'get',
     params
@@ -74,24 +86,24 @@ export function listCollectorTasks(params: CollectorTaskQueryParams) {
 }
 
 /**
- * 启动采集任务
+ * 启用采集任务
  * @param id 任务ID
- * @returns 
+ * @returns 操作结果
  */
 export function startCollectorTask(id: number) {
-  return request<ApiResponse<CollectorTask>>({
+  return request({
     url: `/collector/tasks/${id}/start`,
     method: 'put'
   })
 }
 
 /**
- * 停止采集任务
+ * 禁用采集任务
  * @param id 任务ID
- * @returns 
+ * @returns 操作结果
  */
 export function stopCollectorTask(id: number) {
-  return request<ApiResponse<CollectorTask>>({
+  return request({
     url: `/collector/tasks/${id}/stop`,
     method: 'put'
   })
@@ -237,5 +249,160 @@ export function executeScheduleNow(id: number) {
   return request<ApiResponse<number>>({
     url: `/collector/schedules/${id}/execute`,
     method: 'post'
+  })
+}
+
+/**
+ * 查询任务实例列表
+ * @param params 查询参数
+ * @returns 任务实例列表
+ */
+export function listCollectorTaskInstances(params: any) {
+  return request({
+    url: '/collector/instances',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取任务实例详情
+ * @param id 实例ID
+ * @returns 实例详情
+ */
+export function getCollectorTaskInstanceById(id: number) {
+  return request({
+    url: `/collector/instances/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取任务最近一次执行实例
+ * @param taskId 任务ID
+ * @returns 最近一次执行实例
+ */
+export function getLatestTaskInstance(taskId: number) {
+  return request({
+    url: '/collector/instances/latest',
+    method: 'get',
+    params: { taskId }
+  })
+}
+
+/**
+ * 立即执行任务
+ * @param id 任务ID
+ * @returns 执行结果
+ */
+export function executeTaskNow(id: number) {
+  return request({
+    url: `/collector/tasks/${id}/execute`,
+    method: 'post'
+  })
+}
+
+/**
+ * 获取采集指标数据
+ * @param params 查询参数
+ * @returns 采集指标数据
+ */
+export function getMetricDataByInstanceId(params: {
+  instanceId: number;
+  page?: number;
+  size?: number;
+}) {
+  return request<ApiResponse<PaginationResult<CollectorMetricData>>>({
+    url: '/collector/metrics',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取调度规则列表
+ * @param params 查询参数
+ * @returns 调度规则列表
+ */
+export function listCollectorRules(params: any) {
+  return request({
+    url: '/collector/rules',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取调度规则详情
+ * @param id 规则ID
+ * @returns 规则详情
+ */
+export function getCollectorRuleById(id: number) {
+  return request({
+    url: `/collector/rules/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 创建调度规则
+ * @param data 规则数据
+ * @returns 创建结果
+ */
+export function createCollectorRule(data: any) {
+  return request({
+    url: '/collector/rules',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新调度规则
+ * @param id 规则ID
+ * @param data 规则数据
+ * @returns 更新结果
+ */
+export function updateCollectorRule(id: number, data: any) {
+  return request({
+    url: `/collector/rules/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 删除调度规则
+ * @param id 规则ID
+ * @returns 删除结果
+ */
+export function deleteCollectorRule(id: number) {
+  return request({
+    url: `/collector/rules/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 启用调度规则
+ * @param id 规则ID
+ * @returns 操作结果
+ */
+export function enableCollectorRule(id: number) {
+  return request({
+    url: `/collector/rules/${id}/enable`,
+    method: 'put'
+  })
+}
+
+/**
+ * 禁用调度规则
+ * @param id 规则ID
+ * @returns 操作结果
+ */
+export function disableCollectorRule(id: number) {
+  return request({
+    url: `/collector/rules/${id}/disable`,
+    method: 'put'
   })
 } 

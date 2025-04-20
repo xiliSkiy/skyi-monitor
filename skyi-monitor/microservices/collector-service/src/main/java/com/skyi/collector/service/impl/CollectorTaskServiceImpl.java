@@ -50,6 +50,27 @@ public class CollectorTaskServiceImpl implements CollectorTaskService {
         // 创建采集任务
         CollectorTask task = new CollectorTask();
         BeanUtils.copyProperties(taskDTO, task);
+        
+        // 手动处理metrics字段，将List<MetricDTO>转换为JSON字符串
+        if (taskDTO.getMetrics() != null) {
+            try {
+                task.setMetrics(objectMapper.writeValueAsString(taskDTO.getMetrics()));
+            } catch (JsonProcessingException e) {
+                log.error("转换指标列表为JSON失败", e);
+                throw new IllegalArgumentException("指标格式错误: " + e.getMessage());
+            }
+        }
+        
+        // 手动处理connectionParams字段，将Map转换为JSON字符串
+        if (taskDTO.getConnectionParams() != null) {
+            try {
+                task.setConnectionParams(objectMapper.writeValueAsString(taskDTO.getConnectionParams()));
+            } catch (JsonProcessingException e) {
+                log.error("转换连接参数为JSON失败", e);
+                throw new IllegalArgumentException("连接参数格式错误: " + e.getMessage());
+            }
+        }
+        
         task.setCreateTime(LocalDateTime.now());
         task.setUpdateTime(LocalDateTime.now());
         
@@ -84,6 +105,27 @@ public class CollectorTaskServiceImpl implements CollectorTaskService {
         // 更新任务
         BeanUtils.copyProperties(taskDTO, task);
         task.setId(id); // 确保ID不变
+        
+        // 手动处理metrics字段，将List<MetricDTO>转换为JSON字符串
+        if (taskDTO.getMetrics() != null) {
+            try {
+                task.setMetrics(objectMapper.writeValueAsString(taskDTO.getMetrics()));
+            } catch (JsonProcessingException e) {
+                log.error("转换指标列表为JSON失败", e);
+                throw new IllegalArgumentException("指标格式错误: " + e.getMessage());
+            }
+        }
+        
+        // 手动处理connectionParams字段，将Map转换为JSON字符串
+        if (taskDTO.getConnectionParams() != null) {
+            try {
+                task.setConnectionParams(objectMapper.writeValueAsString(taskDTO.getConnectionParams()));
+            } catch (JsonProcessingException e) {
+                log.error("转换连接参数为JSON失败", e);
+                throw new IllegalArgumentException("连接参数格式错误: " + e.getMessage());
+            }
+        }
+        
         task.setUpdateTime(LocalDateTime.now());
         
         // 保存任务
@@ -107,6 +149,33 @@ public class CollectorTaskServiceImpl implements CollectorTaskService {
         
         CollectorTaskDTO taskDTO = new CollectorTaskDTO();
         BeanUtils.copyProperties(task, taskDTO);
+        
+        // 手动处理metrics字段，将JSON字符串转换为List<MetricDTO>
+        if (task.getMetrics() != null && !task.getMetrics().isEmpty()) {
+            try {
+                List<CollectorTaskDTO.MetricDTO> metricList = objectMapper.readValue(
+                    task.getMetrics(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, CollectorTaskDTO.MetricDTO.class)
+                );
+                taskDTO.setMetrics(metricList);
+            } catch (Exception e) {
+                log.error("解析指标JSON失败", e);
+            }
+        }
+        
+        // 手动处理connectionParams字段，将JSON字符串转换为Map
+        if (task.getConnectionParams() != null && !task.getConnectionParams().isEmpty()) {
+            try {
+                Map<String, String> paramsMap = objectMapper.readValue(
+                    task.getConnectionParams(),
+                    objectMapper.getTypeFactory().constructMapType(Map.class, String.class, String.class)
+                );
+                taskDTO.setConnectionParams(paramsMap);
+            } catch (Exception e) {
+                log.error("解析连接参数JSON失败", e);
+            }
+        }
+        
         return taskDTO;
     }
 
@@ -242,6 +311,11 @@ public class CollectorTaskServiceImpl implements CollectorTaskService {
      * 验证指标配置
      */
     private void validateMetrics(CollectorTaskDTO taskDTO) {
+        // 验证指标列表不能为空
+        if (taskDTO.getMetrics() == null || taskDTO.getMetrics().isEmpty()) {
+            throw new IllegalArgumentException("采集指标不能为空");
+        }
+        
         // 获取对应的采集器
         Optional<Collector> collector = collectors.stream()
                 .filter(c -> c.getType().equals(taskDTO.getType()) && c.getSupportedProtocols().contains(taskDTO.getProtocol()))
@@ -250,7 +324,7 @@ public class CollectorTaskServiceImpl implements CollectorTaskService {
         if (collector.isPresent()) {
             try {
                 // 将指标列表转换为JSON
-                String metricsJson = convertMetricsToJson(taskDTO.getMetrics());
+                String metricsJson = objectMapper.writeValueAsString(taskDTO.getMetrics());
                 
                 // 调用采集器的验证方法
                 String errorMsg = collector.get().validateMetrics(metricsJson);

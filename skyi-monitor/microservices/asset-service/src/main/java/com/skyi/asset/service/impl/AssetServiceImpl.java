@@ -194,6 +194,11 @@ public class AssetServiceImpl implements AssetService {
                 .collect(Collectors.toList());
     }
     
+    @Override
+    public boolean existsById(Long id) {
+        return assetRepository.existsById(id);
+    }
+    
     /**
      * 保存资产标签
      *

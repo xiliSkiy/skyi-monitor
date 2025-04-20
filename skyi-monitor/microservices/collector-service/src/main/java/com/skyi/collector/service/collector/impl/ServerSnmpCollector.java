@@ -151,7 +151,7 @@ public class ServerSnmpCollector extends AbstractCollector {
                             VariableBinding vb = responsePDU.get(0);
                             if (vb != null) {
                                 Variable variable = vb.getVariable();
-                                Double value = parseSnmpValue(variable);
+                                Double value = parseSnmpValue(vb);
                                 
                                 if (value != null) {
                                     // 创建标签
@@ -212,30 +212,41 @@ public class ServerSnmpCollector extends AbstractCollector {
     }
     
     /**
-     * 解析SNMP值
-     * 
-     * @param variable SNMP变量
-     * @return 数值
+     * 将SNMP变量值解析为Double
+     * @param variableBinding 变量绑定对象
+     * @return Double类型的值
      */
-    private Double parseSnmpValue(Variable variable) {
-        if (variable instanceof Integer32) {
-            return (double) ((Integer32) variable).getValue();
-        } else if (variable instanceof UnsignedInteger32) {
-            return (double) ((UnsignedInteger32) variable).getValue();
-        } else if (variable instanceof Counter32) {
-            return (double) ((Counter32) variable).getValue();
-        } else if (variable instanceof Counter64) {
-            return (double) ((Counter64) variable).getValue();
-        } else if (variable instanceof Gauge32) {
-            return (double) ((Gauge32) variable).getValue();
-        } else if (variable instanceof TimeTicks) {
-            return (double) ((TimeTicks) variable).getValue();
-        } else {
-            try {
-                return Double.parseDouble(variable.toString());
-            } catch (NumberFormatException e) {
-                return null;
+    private Double parseSnmpValue(VariableBinding variableBinding) {
+        if (variableBinding == null) {
+            log.warn("SNMP变量绑定对象为空");
+            return 0.0;
+        }
+
+        Variable variable = variableBinding.getVariable();
+        try {
+            if (variable instanceof Integer32) {
+                return (double) ((Integer32) variable).getValue();
+            } else if (variable instanceof UnsignedInteger32) {
+                return (double) ((UnsignedInteger32) variable).getValue();
+            } else if (variable instanceof Counter32) {
+                return (double) ((Counter32) variable).getValue();
+            } else if (variable instanceof Counter64) {
+                return (double) ((Counter64) variable).getValue();
+            } else if (variable instanceof Gauge32) {
+                return (double) ((Gauge32) variable).getValue();
+            } else if (variable instanceof TimeTicks) {
+                return (double) ((TimeTicks) variable).getValue();
+            } else {
+                try {
+                    return Double.parseDouble(variable.toString());
+                } catch (NumberFormatException e) {
+                    log.warn("无法将SNMP值[{}]转换为Double: {}", variable, e.getMessage());
+                    return 0.0;
+                }
             }
+        } catch (Exception e) {
+            log.warn("解析SNMP值时发生错误: {}", e.getMessage());
+            return 0.0;
         }
     }
 } 

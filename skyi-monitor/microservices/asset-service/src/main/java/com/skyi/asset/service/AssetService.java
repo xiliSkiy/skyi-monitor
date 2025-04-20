@@ -85,4 +85,12 @@ public interface AssetService {
      * @return 资产列表
      */
     List<AssetDTO> listAssetsByOwner(String owner);
+    
+    /**
+     * 检查指定ID的资产是否存在
+     *
+     * @param id 资产ID
+     * @return 存在返回true，否则返回false
+     */
+    boolean existsById(Long id);
 } 

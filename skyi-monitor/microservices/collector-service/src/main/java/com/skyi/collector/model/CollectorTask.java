@@ -56,7 +56,7 @@ public class CollectorTask {
     /**
      * 采集间隔(秒)
      */
-    @Column(nullable = false)
+    @Column(name = "`interval`", nullable = false)
     private Integer interval;
     
     /**

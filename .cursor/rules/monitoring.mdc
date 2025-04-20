@@ -1,7 +1,7 @@
 ---
-description: 企业级监控系统构建指南
-globs: ["**/*.java", "**/*.ts", "**/*.vue", "**/*.js", "**/*.xml", "**/*.yml"]
-alwaysApply: true
+description: 
+globs: 
+alwaysApply: false
 ---
 # 企业级监控系统构建规则
 

@@ -65,43 +65,73 @@ const router = createRouter({
           path: 'task/create',
           name: 'CollectorTaskCreate',
           component: () => import('@/views/collector/task/edit.vue'),
-          meta: { title: '创建采集任务', icon: 'el-icon-plus' }
+          meta: { title: '创建采集任务', activeMenu: '/collector/task', hidden: true }
         },
         {
           path: 'task/edit/:id',
           name: 'CollectorTaskEdit',
           component: () => import('@/views/collector/task/edit.vue'),
-          meta: { title: '编辑采集任务', icon: 'el-icon-edit', hidden: true }
+          meta: { title: '编辑采集任务', activeMenu: '/collector/task', hidden: true }
         },
         {
           path: 'task/detail/:id',
           name: 'CollectorTaskDetail',
           component: () => import('@/views/collector/task/detail.vue'),
-          meta: { title: '采集任务详情', icon: 'el-icon-info', hidden: true }
+          meta: { title: '采集任务详情', activeMenu: '/collector/task', hidden: true }
         },
         {
           path: 'schedule',
-          name: 'CollectorScheduleList',
-          component: () => import('@/views/collector/schedule/list.vue'),
+          component: () => import('@/views/collector/schedule/index.vue'),
+          name: 'CollectorSchedule',
           meta: { title: '采集调度', icon: 'el-icon-time' }
         },
         {
-          path: 'schedule/create',
-          name: 'CollectorScheduleCreate',
-          component: () => import('@/views/collector/schedule/edit.vue'),
-          meta: { title: '创建调度', icon: 'el-icon-plus' }
+          path: 'schedule/detail/:id',
+          component: () => import('@/views/collector/schedule/detail.vue'),
+          name: 'CollectorScheduleDetail',
+          meta: { title: '采集任务实例详情', activeMenu: '/collector/schedule', hidden: true }
         },
         {
-          path: 'schedule/create/:taskId',
-          name: 'CollectorScheduleCreateWithTask',
-          component: () => import('@/views/collector/schedule/edit.vue'),
-          meta: { title: '创建调度', icon: 'el-icon-plus', hidden: true }
+          path: 'rule',
+          component: () => import('@/views/collector/rule/index.vue'),
+          name: 'CollectorRuleList',
+          meta: { title: '调度规则', icon: 'el-icon-set-up' }
         },
         {
-          path: 'schedule/edit/:id',
-          name: 'CollectorScheduleEdit',
-          component: () => import('@/views/collector/schedule/edit.vue'),
-          meta: { title: '编辑调度', icon: 'el-icon-edit', hidden: true }
+          path: 'rule/create',
+          name: 'CollectorRuleCreate',
+          component: () => import('@/views/collector/rule/edit.vue'),
+          meta: { title: '创建调度规则', activeMenu: '/collector/rule', hidden: true }
+        },
+        {
+          path: 'rule/edit/:id',
+          name: 'CollectorRuleEdit',
+          component: () => import('@/views/collector/rule/edit.vue'),
+          meta: { title: '编辑调度规则', activeMenu: '/collector/rule', hidden: true }
+        },
+        {
+          path: 'metric',
+          component: () => import('@/views/collector/metric/index.vue'),
+          name: 'CollectorMetric',
+          meta: { title: '指标管理', icon: 'el-icon-s-data' }
+        },
+        {
+          path: 'metric/edit',
+          component: () => import('@/views/collector/metric/edit.vue'),
+          name: 'CollectorMetricAdd',
+          meta: { title: '新增指标', activeMenu: '/collector/metric', hidden: true }
+        },
+        {
+          path: 'metric/edit/:id',
+          component: () => import('@/views/collector/metric/edit.vue'),
+          name: 'CollectorMetricEdit',
+          meta: { title: '编辑指标', activeMenu: '/collector/metric', hidden: true }
+        },
+        {
+          path: 'metric/detail/:id',
+          component: () => import('@/views/collector/metric/detail.vue'),
+          name: 'CollectorMetricDetail',
+          meta: { title: '指标详情', activeMenu: '/collector/metric', hidden: true }
         }
       ]
     },

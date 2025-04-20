@@ -12,7 +12,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 资产管理控制器
@@ -76,6 +78,88 @@ public class AssetController {
         log.info("查询资产请求：id={}", id);
         AssetDTO asset = assetService.getAssetById(id);
         return Result.success(asset);
+    }
+    
+    /**
+     * 根据ID查询资产基本信息
+     *
+     * @param id 资产ID
+     * @return 资产基本信息
+     */
+    @GetMapping("/{id}/basic")
+    public Result<Map<String, Object>> getAssetBasicInfo(@PathVariable Long id) {
+        log.info("查询资产基本信息请求：id={}", id);
+        AssetDTO asset = assetService.getAssetById(id);
+        if (asset == null) {
+            return Result.fail(404, "资产不存在");
+        }
+        
+        Map<String, Object> basicInfo = new HashMap<>();
+        basicInfo.put("id", asset.getId());
+        basicInfo.put("name", asset.getName());
+        basicInfo.put("code", asset.getCode());
+        basicInfo.put("type", asset.getType());
+        basicInfo.put("ip", asset.getIp());
+        basicInfo.put("status", asset.getStatus());
+        return Result.success(basicInfo);
+    }
+    
+    /**
+     * 检查资产是否存在
+     *
+     * @param id 资产ID
+     * @return 存在状态
+     */
+    @GetMapping("/{id}/exists")
+    public Result<Map<String, Boolean>> existsAsset(@PathVariable Long id) {
+        log.info("检查资产是否存在请求：id={}", id);
+        boolean exists = assetService.existsById(id);
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("exists", exists);
+        return Result.success(result);
+    }
+    
+    /**
+     * 获取资产连接参数
+     *
+     * @param id 资产ID
+     * @param protocol 协议类型
+     * @return 连接参数
+     */
+    @GetMapping("/{id}/connection/{protocol}")
+    public Result<Map<String, Object>> getAssetConnectionParams(
+            @PathVariable Long id, 
+            @PathVariable String protocol) {
+        log.info("获取资产连接参数请求：id={}, protocol={}", id, protocol);
+        AssetDTO asset = assetService.getAssetById(id);
+        if (asset == null) {
+            return Result.fail(404, "资产不存在");
+        }
+        
+        Map<String, Object> connectionParams = new HashMap<>();
+        // 根据协议类型获取不同的连接参数
+        if ("snmp".equalsIgnoreCase(protocol)) {
+            connectionParams.put("ipAddress", asset.getIp());
+            connectionParams.put("port", asset.getSnmpPort() != null ? asset.getSnmpPort() : 161);
+            connectionParams.put("community", asset.getSnmpCommunity() != null ? asset.getSnmpCommunity() : "public");
+            connectionParams.put("version", asset.getSnmpVersion() != null ? asset.getSnmpVersion() : 2);
+        } else if ("ssh".equalsIgnoreCase(protocol)) {
+            connectionParams.put("ipAddress", asset.getIp());
+            connectionParams.put("port", asset.getSshPort() != null ? asset.getSshPort() : 22);
+            connectionParams.put("username", asset.getSshUsername());
+            connectionParams.put("password", asset.getSshPassword());
+        } else if ("jdbc".equalsIgnoreCase(protocol)) {
+            connectionParams.put("url", asset.getJdbcUrl());
+            connectionParams.put("username", asset.getJdbcUsername());
+            connectionParams.put("password", asset.getJdbcPassword());
+            connectionParams.put("driverClassName", asset.getJdbcDriverClassName());
+        } else {
+            // 返回通用连接参数
+            connectionParams.put("ipAddress", asset.getIp());
+            connectionParams.put("port", asset.getPort());
+        }
+        
+        return Result.success(connectionParams);
     }
     
     /**

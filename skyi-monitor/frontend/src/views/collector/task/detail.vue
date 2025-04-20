@@ -1,70 +1,124 @@
 <template>
-  <div class="collector-task-detail">
-    <div class="page-header">
-      <h1>采集任务详情</h1>
-      <div class="action-buttons">
-        <el-button type="primary" @click="goBack">返回列表</el-button>
-        <el-button type="warning" @click="editTask">编辑任务</el-button>
-        <el-button type="success" @click="runTask">立即执行</el-button>
+  <div class="container" v-loading="loading">
+    <div class="header">
+      <el-button @click="goBack">
+        <el-icon><ArrowLeft /></el-icon> 返回列表
+      </el-button>
+      <div class="actions">
+        <el-button type="primary" @click="editTask(taskDetail.id)">
+          <el-icon><Edit /></el-icon> 编辑
+        </el-button>
+        <el-button type="success" @click="runTask(taskDetail.id)">
+          <el-icon><VideoPlay /></el-icon> 立即执行
+        </el-button>
       </div>
     </div>
 
-    <el-card v-loading="loading" class="task-info">
+    <!-- 任务详情卡片 -->
+    <el-card class="detail-card">
       <template #header>
         <div class="card-header">
-          <span>基本信息</span>
-          <el-tag :type="task.status === 'active' ? 'success' : 'danger'">
-            {{ task.status === 'active' ? '启用' : '禁用' }}
-          </el-tag>
+          <h3>{{ taskDetail.name }}</h3>
+          <el-tag :type="getStatusType(taskDetail.status)">{{ formatStatus(taskDetail.status) }}</el-tag>
         </div>
       </template>
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="任务名称">{{ task.name }}</el-descriptions-item>
-        <el-descriptions-item label="任务类型">{{ task.type }}</el-descriptions-item>
-        <el-descriptions-item label="采集目标">{{ task.target }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ task.createdTime }}</el-descriptions-item>
-        <el-descriptions-item label="最近运行时间">{{ task.lastRunTime }}</el-descriptions-item>
-        <el-descriptions-item label="创建人">{{ task.createdBy }}</el-descriptions-item>
+      
+      <el-descriptions border>
+        <el-descriptions-item label="任务ID">{{ taskDetail.id }}</el-descriptions-item>
+        <el-descriptions-item label="任务编码">{{ taskDetail.code }}</el-descriptions-item>
+        <el-descriptions-item label="类型">{{ taskDetail.type }}</el-descriptions-item>
+        <el-descriptions-item label="协议">{{ taskDetail.protocol }}</el-descriptions-item>
+        <el-descriptions-item label="采集间隔">{{ taskDetail.interval }}秒</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ formatDateTime(taskDetail.createTime) }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间">{{ formatDateTime(taskDetail.updateTime) }}</el-descriptions-item>
+        <el-descriptions-item label="最后执行时间">{{ formatDateTime(taskDetail.lastExecuteTime) }}</el-descriptions-item>
+        <el-descriptions-item label="最后执行状态" v-if="taskDetail.lastExecuteStatus !== null">
+          <el-tag :type="getStatusType(taskDetail.lastExecuteStatus)">
+            {{ formatExecutionStatus(taskDetail.lastExecuteStatus) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="描述" :span="2">{{ taskDetail.description || '无' }}</el-descriptions-item>
       </el-descriptions>
     </el-card>
-
-    <el-card class="configuration-info">
+    
+    <!-- 连接参数卡片 -->
+    <el-card class="detail-card">
       <template #header>
         <div class="card-header">
-          <span>配置信息</span>
+          <h3>连接参数</h3>
         </div>
       </template>
-      <el-descriptions :column="1" border>
-        <el-descriptions-item v-for="(value, key) in task.configuration" :key="key" :label="key">
-          {{ value }}
+      
+      <el-descriptions border v-if="taskDetail.connectionParams">
+        <el-descriptions-item v-for="(value, key) in taskDetail.connectionParams" :key="key" :label="key">
+          {{ key === 'password' ? '******' : value }}
         </el-descriptions-item>
       </el-descriptions>
+      <div v-else class="no-data">暂无连接参数</div>
     </el-card>
-
-    <el-card class="execution-history">
+    
+    <!-- 采集指标卡片 -->
+    <el-card class="detail-card">
       <template #header>
         <div class="card-header">
-          <span>执行历史</span>
+          <h3>采集指标</h3>
         </div>
       </template>
-      <el-table :data="executionHistory" border stripe>
-        <el-table-column prop="id" label="执行ID" width="80" />
-        <el-table-column prop="startTime" label="开始时间" />
-        <el-table-column prop="endTime" label="结束时间" />
-        <el-table-column prop="duration" label="持续时间(秒)" />
-        <el-table-column prop="status" label="状态">
-          <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)">
-              {{ row.status }}
+      
+      <el-table :data="taskDetail.metrics || []" border style="width: 100%">
+        <el-table-column prop="name" label="指标名称" />
+        <el-table-column prop="path" label="采集路径" />
+        <el-table-column prop="dataType" label="数据类型" />
+        <el-table-column prop="unit" label="单位" />
+        <el-table-column prop="enabled" label="是否启用">
+          <template #default="scope">
+            <el-tag :type="scope.row.enabled ? 'success' : 'info'">
+              {{ scope.row.enabled ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
-          <template #default="{ row }">
-            <el-button type="primary" size="small" @click="viewExecutionDetail(row.id)">查看详情</el-button>
+      </el-table>
+    </el-card>
+
+    <!-- 执行历史卡片 -->
+    <el-card class="execution-history">
+      <template #header>
+        <div class="card-header">
+          <h3>执行历史</h3>
+        </div>
+      </template>
+      
+      <el-table :data="executionHistory" style="width: 100%">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column label="开始时间" width="180">
+          <template #default="scope">
+            {{ formatDateTime(scope.row.startTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="结束时间" width="180">
+          <template #default="scope">
+            {{ formatDateTime(scope.row.endTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="耗时" width="100">
+          <template #default="scope">
+            {{ scope.row.duration ? `${scope.row.duration}ms` : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="scope">
+            <el-tag :type="getStatusType(scope.row.status)">{{ formatExecutionStatus(scope.row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+          <template #default="scope">
+            <el-button type="primary" size="small" @click="viewExecutionDetail(scope.row.id)">
+              查看详情
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
+      <div v-if="executionHistory.length === 0" class="no-data">暂无执行历史</div>
     </el-card>
   </div>
 </template>
@@ -72,137 +126,223 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeft, Edit, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getCollectorTaskById, executeTaskNow } from '@/api/collector'
+import { listCollectorTaskInstances } from '@/api/collector'
+
+interface ExecutionRecord {
+  id: number
+  startTime: string
+  endTime: string
+  duration: number
+  status: number
+}
+
+interface TaskDetail {
+  id: number;
+  name: string;
+  type: string;
+  code: string;
+  status: number;
+  protocol: string;
+  assetId: number;
+  interval: number;
+  connectionParams: Record<string, string>;
+  metrics: {
+    name: string;
+    path: string;
+    dataType: string;
+    unit?: string;
+    enabled: boolean;
+  }[];
+  description: string;
+  createTime: string;
+  updateTime: string;
+  lastExecuteTime: string | null;
+  lastExecuteStatus: number | null;
+}
 
 const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
-const taskId = ref(Number(route.params.id))
 
-// 任务详情数据
-const task = ref({
+// 从路由参数获取任务ID
+const taskId = ref(parseInt(route.params.id as string))
+
+// 任务详情
+const taskDetail = ref<TaskDetail>({
   id: 0,
   name: '',
   type: '',
-  target: '',
-  createdTime: '',
-  lastRunTime: '',
-  status: '',
-  createdBy: '',
-  configuration: {}
+  code: '',
+  status: 0,
+  protocol: '',
+  assetId: 0,
+  interval: 0,
+  connectionParams: {},
+  metrics: [],
+  description: '',
+  createTime: '',
+  updateTime: '',
+  lastExecuteTime: null,
+  lastExecuteStatus: null
 })
 
-// 执行历史数据
-const executionHistory = ref([])
+// 执行历史
+const executionHistory = ref<ExecutionRecord[]>([])
 
 // 获取任务详情
-const fetchTaskDetail = async () => {
+const fetchTaskDetails = async () => {
   loading.value = true
   try {
-    // 这里应该是实际的API调用
-    // const res = await api.getTaskDetail(taskId.value)
-    // task.value = res.data
+    // 调用实际API获取任务详情
+    const response = await getCollectorTaskById(taskId.value)
+    console.log('任务详情:', response.data)
+    // 使用类型断言确保类型兼容
+    taskDetail.value = response.data as unknown as TaskDetail
     
-    // 模拟数据
-    task.value = {
-      id: taskId.value,
-      name: 'Linux服务器采集',
-      type: 'SSH',
-      target: '192.168.1.100',
-      createdTime: '2023-10-01 10:00:00',
-      lastRunTime: '2023-10-05 08:30:00',
-      status: 'active',
-      createdBy: '管理员',
-      configuration: {
-        '用户名': 'admin',
-        '端口': '22',
-        '采集间隔': '60秒',
-        '超时时间': '30秒',
-        '采集指标': 'CPU使用率,内存使用率,磁盘使用率'
-      }
-    }
-    
-    // 模拟执行历史数据
-    executionHistory.value = [
-      {
-        id: 1001,
-        startTime: '2023-10-05 08:30:00',
-        endTime: '2023-10-05 08:30:45',
-        duration: 45,
-        status: 'success'
-      },
-      {
-        id: 1000,
-        startTime: '2023-10-04 08:30:00',
-        endTime: '2023-10-04 08:30:50',
-        duration: 50,
-        status: 'failed'
-      }
-    ]
+    // 获取任务的执行历史记录
+    await fetchExecutionHistory()
   } catch (error) {
+    console.error('获取任务详情失败', error)
     ElMessage.error('获取任务详情失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
 }
 
-// 获取状态对应的类型
-const getStatusType = (status: string) => {
-  const statusMap: Record<string, string> = {
-    'success': 'success',
-    'failed': 'danger',
-    'running': 'primary',
-    'pending': 'info'
+// 获取执行历史
+const fetchExecutionHistory = async () => {
+  try {
+    // 调用实际API获取任务的执行历史
+    const response = await listCollectorTaskInstances({
+      taskId: taskId.value,
+      page: 0,
+      size: 10
+    })
+    console.log('执行历史:', response.data)
+    executionHistory.value = response.data.content || []
+  } catch (error) {
+    console.error('获取执行历史失败', error)
+    ElMessage.error('获取执行历史失败')
   }
-  return statusMap[status] || 'info'
+}
+
+// 返回列表页
+const goBack = () => {
+  router.push('/collector/task')
 }
 
 // 编辑任务
-const editTask = () => {
-  router.push(`/collector/task/edit/${taskId.value}`)
+const editTask = (id: number) => {
+  router.push(`/collector/task/edit/${id}`)
 }
 
 // 立即执行任务
-const runTask = async () => {
+const runTask = async (id: number) => {
   try {
-    // 这里应该是实际的API调用
-    // await api.runTask(taskId.value)
+    const response = await executeTaskNow(id)
+    console.log('执行任务结果:', response)
     ElMessage.success('任务已开始执行')
+    // 刷新执行历史
+    setTimeout(() => {
+      fetchExecutionHistory()
+    }, 1000)
   } catch (error) {
+    console.error('执行任务失败', error)
     ElMessage.error('执行任务失败')
-    console.error(error)
   }
 }
 
 // 查看执行详情
-const viewExecutionDetail = (executionId: number) => {
-  router.push(`/collector/task/execution/${executionId}`)
+const viewExecutionDetail = (id: number) => {
+  router.push(`/collector/schedule/detail/${id}`)
 }
 
-// 返回列表
-const goBack = () => {
-  router.push('/collector/task/list')
+// 获取状态对应的标签类型
+const getStatusType = (status: number | string) => {
+  if (typeof status === 'string') {
+    switch (status) {
+      case 'active':
+      case 'success':
+        return 'success'
+      case 'inactive':
+        return 'info'
+      case 'failed':
+        return 'danger'
+      default:
+        return 'warning'
+    }
+  } else {
+    switch (status) {
+      case 1:
+        return 'success'
+      case 0:
+        return 'danger'
+      case 2:
+        return 'warning'
+      default:
+        return 'info'
+    }
+  }
+}
+
+// 格式化状态文本
+const formatStatus = (status: number) => {
+  switch (status) {
+    case 1:
+      return '启用'
+    case 0:
+      return '禁用'
+    default:
+      return '未知'
+  }
+}
+
+// 格式化执行状态文本
+const formatExecutionStatus = (status: number) => {
+  switch (status) {
+    case 1:
+      return '成功'
+    case 0:
+      return '失败'
+    case 2:
+      return '进行中'
+    default:
+      return '未知'
+  }
+}
+
+// 格式化时间
+const formatDateTime = (dateTime: string | null) => {
+  if (!dateTime) return '-'
+  return new Date(dateTime).toLocaleString()
 }
 
 onMounted(() => {
-  fetchTaskDetail()
+  fetchTaskDetails()
 })
 </script>
 
 <style scoped>
-.collector-task-detail {
+.container {
   padding: 20px;
 }
 
-.page-header {
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.action-buttons {
+.header .title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.header .actions {
   display: flex;
   gap: 10px;
 }
@@ -213,13 +353,17 @@ onMounted(() => {
   align-items: center;
 }
 
-.task-info,
-.configuration-info,
-.execution-history {
+.detail-card, .config-card, .execution-history {
   margin-bottom: 20px;
 }
 
-.execution-history .el-table {
-  margin-top: 10px;
+.execution-history {
+  margin-bottom: 0;
+}
+
+.no-data {
+  text-align: center;
+  color: #909399;
+  padding: 30px 0;
 }
 </style> 

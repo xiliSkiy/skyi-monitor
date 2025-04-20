@@ -60,6 +60,6 @@ public interface CollectorTaskRepository extends JpaRepository<CollectorTask, Lo
      * @param currentTime 当前时间
      * @return 需要执行的任务列表
      */
-    @Query("SELECT t FROM CollectorTask t WHERE t.status = 1 AND (t.lastExecuteTime IS NULL OR t.lastExecuteTime <= :currentTime)")
+    @Query("SELECT t FROM CollectorTask t WHERE t.status = 1 AND (t.lastExecuteTime IS NULL OR TIMESTAMPDIFF(SECOND, t.lastExecuteTime, :currentTime) >= t.interval)")
     List<CollectorTask> findTasksNeedExecute(LocalDateTime currentTime);
 } 

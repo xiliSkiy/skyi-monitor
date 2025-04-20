@@ -103,6 +103,43 @@
           </el-form-item>
         </template>
         
+        <!-- 数据库类型配置 -->
+        <template v-if="taskForm.type === 'DATABASE'">
+          <el-form-item label="数据库类型" prop="configuration.dbType">
+            <el-select v-model="taskForm.configuration.dbType" placeholder="请选择数据库类型">
+              <el-option label="MySQL" value="mysql" />
+              <el-option label="PostgreSQL" value="postgresql" disabled />
+              <el-option label="Oracle" value="oracle" disabled />
+              <el-option label="SQL Server" value="sqlserver" disabled />
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item label="主机地址" prop="configuration.host">
+            <el-input v-model="taskForm.configuration.host" placeholder="请输入数据库主机地址" />
+          </el-form-item>
+          
+          <el-form-item label="端口" prop="configuration.port">
+            <el-input-number v-model="taskForm.configuration.port" :min="1" :max="65535" />
+          </el-form-item>
+          
+          <el-form-item label="数据库名" prop="configuration.database">
+            <el-input v-model="taskForm.configuration.database" placeholder="请输入数据库名" />
+          </el-form-item>
+          
+          <el-form-item label="用户名" prop="configuration.username">
+            <el-input v-model="taskForm.configuration.username" placeholder="请输入数据库用户名" />
+          </el-form-item>
+          
+          <el-form-item label="密码" prop="configuration.password">
+            <el-input 
+              v-model="taskForm.configuration.password" 
+              placeholder="请输入数据库密码" 
+              type="password" 
+              show-password
+            />
+          </el-form-item>
+        </template>
+        
         <!-- 通用配置 -->
         <el-form-item label="采集间隔(秒)" prop="configuration.interval">
           <el-input-number v-model="taskForm.configuration.interval" :min="5" :max="86400" />
@@ -143,6 +180,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
+import { createCollectorTask, updateCollectorTask, getCollectorTaskById } from '@/api/collector'
 
 const route = useRoute()
 const router = useRouter()
@@ -181,6 +219,19 @@ const metricOptions = [
       { label: '线程数', value: 'thread_count' },
       { label: 'GC次数', value: 'gc_count' }
     ]
+  },
+  {
+    label: 'MySQL指标',
+    options: [
+      { label: '连接数', value: 'connection_count' },
+      { label: '慢查询数', value: 'slow_query_count' },
+      { label: '运行时间', value: 'uptime' },
+      { label: '查询总数', value: 'questions' },
+      { label: '接收字节数', value: 'bytes_received' },
+      { label: '发送字节数', value: 'bytes_sent' },
+      { label: 'InnoDB行锁定时间', value: 'innodb_row_lock_time' },
+      { label: 'InnoDB缓冲池使用率', value: 'innodb_buffer_pool_usage' }
+    ]
   }
 ]
 
@@ -190,6 +241,8 @@ const taskForm = reactive({
   type: '',
   target: '',
   status: 'active',
+  protocol: '',
+  code: '',
   configuration: {
     username: '',
     password: '',
@@ -198,7 +251,11 @@ const taskForm = reactive({
     token: '',
     interval: 60,
     timeout: 30,
-    metrics: []
+    metrics: [] as string[],
+    // 数据库特有配置
+    dbType: 'mysql',
+    host: '',
+    database: ''
   }
 })
 
@@ -219,57 +276,94 @@ const rules = reactive<FormRules>({
   ],
   'configuration.metrics': [
     { required: true, message: '请选择至少一个采集指标', trigger: 'change' }
+  ],
+  // 数据库相关验证
+  'configuration.host': [
+    { required: true, message: '请输入数据库主机地址', trigger: 'blur' }
+  ],
+  'configuration.port': [
+    { required: true, message: '请输入数据库端口', trigger: 'blur' }
+  ],
+  'configuration.username': [
+    { required: true, message: '请输入数据库用户名', trigger: 'blur' }
+  ],
+  'configuration.password': [
+    { required: true, message: '请输入数据库密码', trigger: 'blur' }
   ]
 })
 
 // 处理任务类型变更
 const handleTypeChange = (type: string) => {
-  // 根据不同类型重置部分配置
+  // 根据不同类型重置部分配置和指标
+  taskForm.configuration.metrics = [] // 清空已选指标
+  
   if (type === 'SSH') {
     taskForm.configuration.port = 22
   } else if (type === 'HTTP') {
     taskForm.configuration.authType = 'none'
+  } else if (type === 'DATABASE') {
+    // 数据库采集的默认配置
+    taskForm.configuration.port = 3306
+    taskForm.configuration.dbType = 'mysql'
+    taskForm.protocol = 'mysql'
+    // 设置target为host的值
+    if (taskForm.configuration.host) {
+      taskForm.target = taskForm.configuration.host
+    }
   }
 }
 
 // 获取任务详情（编辑模式）
 const fetchTaskDetail = async () => {
-  if (!isEdit.value) return
+  if (!isEdit.value || !taskId.value) return
   
   loading.value = true
   try {
-    // 这里应该是实际的API调用
-    // const res = await api.getTaskDetail(taskId.value)
-    // const taskData = res.data
+    // 实际的API调用
+    const res = await getCollectorTaskById(taskId.value)
+    const taskData = res.data
     
-    // 模拟数据
-    const taskData = {
-      id: taskId.value,
-      name: 'Linux服务器采集',
-      type: 'SSH',
-      target: '192.168.1.100',
-      status: 'active',
-      configuration: {
-        username: 'admin',
-        password: '******',
-        port: 22,
-        interval: 60,
-        timeout: 30,
-        metrics: ['cpu_usage', 'memory_usage', 'disk_usage']
-      }
-    }
+    console.log('获取任务详情:', taskData)
     
     // 填充表单数据
     taskForm.name = taskData.name
-    taskForm.type = taskData.type
-    taskForm.target = taskData.target
-    taskForm.status = taskData.status
+    taskForm.code = taskData.code
+    taskForm.type = taskData.type.toUpperCase() // 转换为大写以匹配前端枚举值
+    taskForm.target = taskData.connectionParams?.host || ''
+    taskForm.status = taskData.status === 1 ? 'active' : 'inactive'
+    taskForm.protocol = taskData.protocol
     
     // 填充配置数据
-    Object.assign(taskForm.configuration, taskData.configuration)
+    if (taskData.connectionParams) {
+      const connParams = taskData.connectionParams
+      // 通用配置
+      taskForm.configuration.username = connParams.username || ''
+      taskForm.configuration.password = connParams.password || ''
+      
+      // 根据不同类型处理特殊配置
+      if (taskForm.type === 'SSH') {
+        taskForm.configuration.port = parseInt(connParams.port || '22')
+      } else if (taskForm.type === 'HTTP') {
+        taskForm.configuration.authType = connParams.authType || 'none'
+        taskForm.configuration.token = connParams.token || ''
+      } else if (taskForm.type === 'DATABASE') {
+        taskForm.configuration.port = parseInt(connParams.port || '3306')
+        taskForm.configuration.host = connParams.host || ''
+        taskForm.configuration.database = connParams.database || 'mysql'
+        taskForm.configuration.dbType = connParams.dbType || 'mysql'
+      }
+    }
+    
+    taskForm.configuration.interval = taskData.interval
+    
+    // 填充指标数据
+    if (taskData.metrics && Array.isArray(taskData.metrics)) {
+      taskForm.configuration.metrics = taskData.metrics.map(m => m.path)
+    }
+    
   } catch (error) {
+    console.error('获取任务详情出错:', error)
     ElMessage.error('获取任务详情失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
@@ -282,27 +376,66 @@ const saveTask = async () => {
     
     saving.value = true
     try {
-      // 构建任务数据
-      const taskData = {
-        ...taskForm,
-        id: taskId.value
+      // 构建连接参数
+      const connectionParams: Record<string, string> = {}
+      
+      if (taskForm.type === 'SSH') {
+        connectionParams.host = taskForm.target
+        connectionParams.port = taskForm.configuration.port.toString()
+        connectionParams.username = taskForm.configuration.username
+        connectionParams.password = taskForm.configuration.password
+      } else if (taskForm.type === 'HTTP') {
+        connectionParams.url = taskForm.target
+        if (taskForm.configuration.authType === 'basic') {
+          connectionParams.username = taskForm.configuration.username
+          connectionParams.password = taskForm.configuration.password
+        } else if (taskForm.configuration.authType === 'token') {
+          connectionParams.token = taskForm.configuration.token
+        }
+      } else if (taskForm.type === 'DATABASE') {
+        connectionParams.host = taskForm.configuration.host || taskForm.target
+        connectionParams.port = taskForm.configuration.port.toString()
+        connectionParams.username = taskForm.configuration.username
+        connectionParams.password = taskForm.configuration.password
+        connectionParams.database = taskForm.configuration.database || 'mysql'
       }
       
-      // 这里应该是实际的API调用
-      // if (isEdit.value) {
-      //   await api.updateTask(taskData)
-      // } else {
-      //   await api.createTask(taskData)
-      // }
+      // 构建任务数据
+      const taskData = {
+        name: taskForm.name,
+        code: taskForm.code || Date.now().toString(), // 使用时间戳作为临时编码
+        type: taskForm.type === 'DATABASE' ? 'database' : taskForm.type.toLowerCase(),
+        protocol: taskForm.protocol || (taskForm.type === 'DATABASE' ? 'mysql' : ''),
+        assetId: 1, // 这里应该从选择框中获取，暂时使用固定值
+        interval: taskForm.configuration.interval,
+        status: taskForm.status === 'active' ? 1 : 0,
+        description: '',
+        // 转换格式以符合后端API要求
+        metrics: taskForm.configuration.metrics.map(metric => ({
+          name: metric,
+          path: metric,
+          dataType: 'gauge',
+          enabled: true
+        })),
+        connectionParams: connectionParams
+      }
       
-      // 模拟保存成功
-      setTimeout(() => {
-        ElMessage.success(`${isEdit.value ? '更新' : '创建'}任务成功`)
-        goBack()
-      }, 1000)
+      console.log('发送的任务数据:', taskData)
+      
+      // 实际的API调用
+      if (isEdit.value && taskId.value) {
+        const res = await updateCollectorTask(taskId.value, taskData)
+        console.log('更新任务结果:', res)
+      } else {
+        const res = await createCollectorTask(taskData)
+        console.log('创建任务结果:', res)
+      }
+      
+      ElMessage.success(`${isEdit.value ? '更新' : '创建'}任务成功`)
+      goBack()
     } catch (error) {
+      console.error('保存任务时出错:', error)
       ElMessage.error(`${isEdit.value ? '更新' : '创建'}任务失败`)
-      console.error(error)
     } finally {
       saving.value = false
     }

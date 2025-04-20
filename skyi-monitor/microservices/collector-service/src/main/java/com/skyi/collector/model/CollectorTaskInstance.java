@@ -28,6 +28,18 @@ public class CollectorTaskInstance {
     private Long taskId;
     
     /**
+     * 关联的任务
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false)
+    private CollectorTask task;
+    
+    /**
+     * 任务调度ID
+     */
+    private Long scheduleId;
+    
+    /**
      * 资产ID
      */
     @Column(nullable = false)
@@ -74,4 +86,25 @@ public class CollectorTaskInstance {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updateTime;
+    
+    /**
+     * 获取关联的任务对象
+     * 
+     * @return 任务对象
+     */
+    public CollectorTask getTask() {
+        return task;
+    }
+    
+    /**
+     * 设置关联的任务对象
+     * 
+     * @param task 任务对象
+     */
+    public void setTask(CollectorTask task) {
+        this.task = task;
+        if (task != null) {
+            this.taskId = task.getId();
+        }
+    }
 } 

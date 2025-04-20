@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 采集任务实例数据访问接口
@@ -53,4 +54,12 @@ public interface CollectorTaskInstanceRepository extends JpaRepository<Collector
      * @return 任务实例列表
      */
     List<CollectorTaskInstance> findByStartTimeBetween(LocalDateTime startTimeFrom, LocalDateTime startTimeTo);
+
+    /**
+     * 根据任务ID查询最近一次执行实例
+     *
+     * @param taskId 任务ID
+     * @return 最近一次执行实例
+     */
+    Optional<CollectorTaskInstance> findTopByTaskIdOrderByStartTimeDesc(Long taskId);
 } 

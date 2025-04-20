@@ -81,6 +81,56 @@ public class AssetDTO {
     private List<TagDTO> tags;
     
     /**
+     * SNMP端口
+     */
+    private Integer snmpPort;
+    
+    /**
+     * SNMP团体名
+     */
+    private String snmpCommunity;
+    
+    /**
+     * SNMP版本
+     */
+    private Integer snmpVersion;
+    
+    /**
+     * SSH端口
+     */
+    private Integer sshPort;
+    
+    /**
+     * SSH用户名
+     */
+    private String sshUsername;
+    
+    /**
+     * SSH密码
+     */
+    private String sshPassword;
+    
+    /**
+     * JDBC URL
+     */
+    private String jdbcUrl;
+    
+    /**
+     * JDBC用户名
+     */
+    private String jdbcUsername;
+    
+    /**
+     * JDBC密码
+     */
+    private String jdbcPassword;
+    
+    /**
+     * JDBC驱动类名
+     */
+    private String jdbcDriverClassName;
+    
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -89,6 +139,22 @@ public class AssetDTO {
      * 更新时间
      */
     private LocalDateTime updateTime;
+    
+    /**
+     * 获取IP地址
+     * 兼容ipAddress字段重命名
+     */
+    public String getIp() {
+        return ipAddress;
+    }
+    
+    /**
+     * 设置IP地址
+     * 兼容ipAddress字段重命名
+     */
+    public void setIp(String ip) {
+        this.ipAddress = ip;
+    }
     
     /**
      * 标签数据传输对象

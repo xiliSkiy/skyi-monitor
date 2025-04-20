@@ -73,4 +73,12 @@ public interface CollectorMetricDataRepository extends JpaRepository<CollectorMe
      */
     List<CollectorMetricData> findByAssetIdAndMetricNameAndCollectTimeBetween(
             Long assetId, String metricName, LocalDateTime startTime, LocalDateTime endTime);
+
+    /**
+     * 根据实例ID统计指标数量
+     *
+     * @param instanceId 实例ID
+     * @return 指标数量
+     */
+    long countByInstanceId(Long instanceId);
 } 
