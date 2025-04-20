@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -258,7 +259,7 @@ public class AssetServiceImplTest {
         Page<Asset> assetPage = new PageImpl<>(assets, pageable, assets.size());
         
         // 模拟仓库行为
-        when(assetRepository.findAll(any(), eq(pageable))).thenReturn(assetPage);
+        when(assetRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(assetPage);
         when(assetTagRepository.findByAssetId(asset1.getId())).thenReturn(new ArrayList<>());
         when(assetTagRepository.findByAssetId(asset2.getId())).thenReturn(new ArrayList<>());
         
@@ -272,7 +273,7 @@ public class AssetServiceImplTest {
         assertEquals(2, result.getContent().size());
         
         // 验证调用
-        verify(assetRepository, times(1)).findAll(any(), eq(pageable));
+        verify(assetRepository, times(1)).findAll(any(Specification.class), eq(pageable));
         verify(assetTagRepository, times(1)).findByAssetId(asset1.getId());
         verify(assetTagRepository, times(1)).findByAssetId(asset2.getId());
     }

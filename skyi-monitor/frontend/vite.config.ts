@@ -14,7 +14,12 @@ export default defineConfig({
       imports: ['vue', 'vue-router', 'pinia']
     }),
     Components({
-      resolvers: [ElementPlusResolver()]
+      resolvers: [ElementPlusResolver()],
+      directoryAsNamespace: true,
+      dts: true,
+      exclude: [
+        /[\\/]visualization[\\/]charts[\\/].*/
+      ]
     })
   ],
   resolve: {
@@ -25,15 +30,30 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api/assets': {
+      '/api/asset': {
         target: 'http://localhost:8081',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api\/asset/, '')
       },
       '/api/collector': {
         target: 'http://localhost:8082',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/collector/, '')
+      },
+      '/api/storage': {
+        target: 'http://localhost:9001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/storage/, '')
+      },
+      '/api/visualization': {
+        target: 'http://localhost:9004',
+        changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/api/alert': {
+        target: 'http://localhost:9003',
+        changeOrigin: true,
+        rewrite: (path) => path
       }
     }
   }

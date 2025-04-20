@@ -29,9 +29,20 @@ spring:
         file-extension: yaml
   
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
+      # 重试次数
+      retries: 3
+      # 批量大小
+      batch-size: 16384
+      # 缓冲区大小
+      buffer-memory: 33554432
+      # 幂等性
+      properties:
+        enable.idempotence: true
+      # 关键字段序列化
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # 值序列化，使用JSON序列化器
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       group-id: collector-service
@@ -56,6 +67,13 @@ xxl:
 
 # 采集器配置
 collector:
+  # Kafka配置
+  kafka:
+    enabled: true
+    topics:
+      metric-data: collector-metric-data
+      collection-status: collector-status
+  
   # 服务器采集配置
   server:
     enabled: true
@@ -91,4 +109,5 @@ collector:
 logging:
   level:
     com.skyi: info
-    org.hibernate.SQL: debug 
+    org.hibernate.SQL: debug
+    org.apache.kafka: warn 

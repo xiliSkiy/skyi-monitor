@@ -25,9 +25,7 @@
         <module>microservices/storage-service</module>
         <module>microservices/alert-service</module>
         <module>microservices/visualization-service</module>
-        <module>microservices/auth-service</module>
         <module>common</module>
-        <module>agent</module>
     </modules>
     
     <properties>

@@ -1,0 +1,7 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="200" fill="#f5f5f5" />
+  <polyline points="40,160 90,60 140,120 190,40 240,100" stroke="#5470c6" stroke-width="2" fill="none" />
+  <text x="150" y="30" font-family="Arial" font-size="14" text-anchor="middle">折线图</text>
+  <line x1="30" y1="170" x2="270" y2="170" stroke="#333" stroke-width="1" />
+  <line x1="30" y1="30" x2="30" y2="170" stroke="#333" stroke-width="1" />
+</svg> 

@@ -3,103 +3,141 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, watch, defineProps } from 'vue';
-import * as echarts from 'echarts';
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import * as echarts from 'echarts/core';
+import { LineChart as LineChartComponent } from 'echarts/charts';
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 
-// 定义组件属性
+// 定义数据项接口
+interface ChartDataItem {
+  name: string;
+  value: number;
+  time?: string;
+  date?: string;
+  [key: string]: any;
+}
+
+// 注册必要的组件
+echarts.use([
+  LineChartComponent,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer
+]);
+
 const props = defineProps({
-  // 图表数据
   data: {
-    type: Array,
+    type: Array as () => ChartDataItem[],
     default: () => []
   },
-  // 图表配置选项
   options: {
     type: Object,
     default: () => ({})
   }
 });
 
-// 图表DOM引用
 const chartRef = ref<HTMLElement | null>(null);
-// 图表实例
 let chartInstance: echarts.ECharts | null = null;
+
+// 从数据中提取系列和分类
+const processedData = computed(() => {
+  if (!Array.isArray(props.data) || props.data.length === 0) return { series: [], categories: [] };
+  
+  // 提取所有类别名称
+  const categories = Array.from(new Set(props.data.map((item: ChartDataItem) => item.name || '')));
+  
+  // 按类别组织数据
+  const seriesData = categories.map(category => {
+    const categoryData = props.data.filter((item: ChartDataItem) => item.name === category);
+    return {
+      name: category,
+      type: 'line',
+      data: categoryData.map((item: ChartDataItem) => item.value),
+      // 允许通过options定制线条样式
+      ...props.options.seriesStyle
+    };
+  });
+  
+  // 提取时间轴（X轴）数据，假设每个类别的数据都有相同的时间点
+  const xAxisData = props.data.filter((item: ChartDataItem) => item.name === categories[0])
+    .map((item: ChartDataItem) => item.time || item.date || '');
+  
+  return {
+    series: seriesData,
+    categories: xAxisData
+  };
+});
 
 // 初始化图表
 const initChart = () => {
   if (!chartRef.value) return;
   
-  // 创建ECharts实例
+  // 创建图表实例
   chartInstance = echarts.init(chartRef.value);
-  
-  // 设置响应式调整大小
-  window.addEventListener('resize', handleResize);
   
   // 渲染图表
   updateChart();
+  
+  // 添加窗口大小调整监听
+  window.addEventListener('resize', handleResize);
 };
 
 // 更新图表数据和配置
 const updateChart = () => {
   if (!chartInstance) return;
   
-  // 默认配置
-  const defaultOptions = {
+  // 折线图配置
+  const option = {
+    title: {
+      text: props.options.title || '折线图',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: processedData.value.series.map(s => s.name),
+      bottom: 0
+    },
     grid: {
       left: '3%',
       right: '4%',
-      bottom: '3%',
+      bottom: '10%',
+      top: '15%',
       containLabel: true
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'cross',
-        label: {
-          backgroundColor: '#6a7985'
-        }
-      }
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: props.data.map((item: any) => item.timestamp || item.name || '')
+      data: processedData.value.categories,
+      ...props.options.xAxis
     },
     yAxis: {
-      type: 'value'
+      type: 'value',
+      ...props.options.yAxis
     },
-    series: [
-      {
-        name: '数值',
-        type: 'line',
-        stack: '总量',
-        areaStyle: {},
-        emphasis: {
-          focus: 'series'
-        },
-        data: props.data.map((item: any) => item.value || 0)
-      }
-    ]
-  };
-  
-  // 合并用户自定义配置
-  const mergedOptions = {
-    ...defaultOptions,
+    series: processedData.value.series,
     ...props.options
   };
   
-  // 应用配置
-  chartInstance.setOption(mergedOptions, true);
+  // 设置图表配置
+  chartInstance.setOption(option);
 };
 
 // 处理窗口大小调整
 const handleResize = () => {
-  if (chartInstance) {
-    chartInstance.resize();
-  }
+  chartInstance?.resize();
 };
 
-// 监听数据和配置变化
+// 监听数据变化
 watch(() => props.data, updateChart, { deep: true });
 watch(() => props.options, updateChart, { deep: true });
 
@@ -109,18 +147,17 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  // 清理资源
-  if (chartInstance) {
-    chartInstance.dispose();
-    chartInstance = null;
-  }
+  // 清理事件监听和图表实例
   window.removeEventListener('resize', handleResize);
+  chartInstance?.dispose();
+  chartInstance = null;
 });
 </script>
 
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 300px;
+  height: 100%;
+  min-height: 250px;
 }
 </style> 

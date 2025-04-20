@@ -9,8 +9,10 @@ import com.skyi.collector.repository.CollectorTaskInstanceRepository;
 import com.skyi.collector.repository.MetricDefinitionRepository;
 import com.skyi.collector.repository.MetricProtocolMappingRepository;
 import com.skyi.collector.service.collector.*;
+import com.skyi.collector.service.impl.MetricDataProducerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -39,6 +41,12 @@ public class MetricCollectionService {
     
     @Autowired
     private AssetService assetService; // 假设存在一个资产服务用于获取资产信息
+    
+    @Autowired
+    private MetricDataProducerService metricDataProducerService;
+    
+    @Value("${collector.kafka.enabled:true}")
+    private boolean kafkaEnabled;
     
     /**
      * 测试连接
@@ -123,6 +131,20 @@ public class MetricCollectionService {
             // 更新任务实例状态
             updateTaskInstanceStatus(instance, result);
             
+            // 通过Kafka发送采集到的指标数据
+            if (kafkaEnabled && result.isSuccess() && result.getMetricData() != null && !result.getMetricData().isEmpty()) {
+                try {
+                    // 发送指标数据
+                    int sentCount = metricDataProducerService.sendMetricDataBatch(result.getMetricData());
+                    log.info("发送指标数据到Kafka，任务ID={}，成功：{}/{}条", task.getId(), sentCount, result.getMetricData().size());
+                    
+                    // 发送采集状态
+                    metricDataProducerService.sendCollectionStatus(task.getId(), instance.getId(), task.getAssetId(), result);
+                } catch (Exception e) {
+                    log.error("发送数据到Kafka失败，任务ID={}，实例ID={}", task.getId(), instance.getId(), e);
+                }
+            }
+            
             return result;
         } catch (Exception e) {
             log.error("采集执行出错: {}", e.getMessage(), e);
@@ -133,10 +155,23 @@ public class MetricCollectionService {
             instance.setEndTime(LocalDateTime.now());
             taskInstanceRepository.save(instance);
             
-            return CollectionResult.failure(context.getInstanceId() != null ? 
-                    instance.getStartTime() : LocalDateTime.now(), 
+            // 构建失败结果
+            CollectionResult failureResult = CollectionResult.failure(
+                    instance.getStartTime(), 
                     LocalDateTime.now(), 
-                    "采集执行出错: " + e.getMessage());
+                    "采集执行出错: " + e.getMessage()
+            );
+            
+            // 发送失败状态到Kafka
+            if (kafkaEnabled) {
+                try {
+                    metricDataProducerService.sendCollectionStatus(task.getId(), instance.getId(), task.getAssetId(), failureResult);
+                } catch (Exception ex) {
+                    log.error("发送采集失败状态到Kafka失败，任务ID={}，实例ID={}", task.getId(), instance.getId(), ex);
+                }
+            }
+            
+            return failureResult;
         }
     }
     

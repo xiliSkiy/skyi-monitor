@@ -307,3 +307,34 @@ Kubernetes集群
 4. **边缘计算支持**:
    - 采集服务向边缘节点扩展
    - 数据预处理下沉到边缘节点 
+
+
+   storage-service/
+├── src/main/java/com/skyi/storage/
+│   ├── config/                    # 配置类
+│   │   ├── InfluxDBConfig.java    # InfluxDB配置
+│   │   ├── RedisConfig.java       # Redis配置
+│   │   └── AsyncConfig.java       # 异步任务配置
+│   ├── controller/                # 控制器
+│   │   ├── MetricStorageController.java
+│   │   └── MetadataController.java
+│   ├── service/                   # 服务接口及实现
+│   │   ├── timeseries/            # 时序数据服务
+│   │   │   ├── TimeSeriesService.java
+│   │   │   └── impl/InfluxDBTimeSeriesServiceImpl.java
+│   │   ├── metadata/              # 元数据服务
+│   │   │   ├── MetadataService.java
+│   │   │   └── impl/MySQLMetadataServiceImpl.java
+│   │   └── cache/                 # 缓存服务
+│   │       ├── CacheService.java
+│   │       └── impl/RedisCacheServiceImpl.java
+│   ├── model/                     # 数据模型
+│   │   ├── MetricData.java        # 指标数据模型
+│   │   └── MetadataEntity.java    # 元数据模型
+│   ├── repository/                # 数据访问层
+│   │   └── MetadataRepository.java
+│   ├── dto/                       # 数据传输对象
+│   ├── exception/                 # 异常处理
+│   └── StorageServiceApplication.java
+└── src/main/resources/
+    └── application.yml

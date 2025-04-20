@@ -28,6 +28,16 @@ SKYI 监控系统是一个全面的企业级监控解决方案，用于监控服
 - 应用服务层
 - 展示层
 
+### 消息处理流程
+
+系统使用Kafka作为消息队列，实现数据采集和处理的解耦：
+
+1. 采集服务从目标资产收集指标数据
+2. 采集的数据被发送到Kafka的`collector-metric-data`主题
+3. 处理服务从Kafka消费数据并进行处理
+4. 处理后的数据被存储到InfluxDB
+5. 告警服务监控数据并触发相应的告警
+
 ## 快速开始
 
 ### 前置条件
@@ -57,6 +67,10 @@ SKYI 监控系统是一个全面的企业级监控解决方案，用于监控服
     
     # 或者使用脚本启动
     ./scripts/start-dev.sh
+    
+    # 单独启动Kafka
+    cd infrastructure/kafka
+    ./start-kafka.sh
     ```
 
 3. 编译项目
@@ -73,6 +87,7 @@ SKYI 监控系统是一个全面的企业级监控解决方案，用于监控服
     - 资产管理服务: http://localhost:8081
     - Nacos控制台: http://localhost:8848/nacos
     - InfluxDB控制台: http://localhost:8086
+    - Kafka控制台: http://localhost:8080
 
 ## 项目结构
 
@@ -82,6 +97,10 @@ skyi-monitor/
 ├── docker/                            # Docker配置文件
 ├── kubernetes/                        # K8s部署配置
 ├── infrastructure/                    # 基础设施代码
+│   ├── kafka/                         # Kafka配置和工具
+│   │   ├── config/                    # Kafka配置文件
+│   │   ├── docker/                    # Kafka Docker配置
+│   │   └── utils/                     # Kafka测试工具
 ├── microservices/                     # 微服务模块
 │   ├── asset-service/                 # 资产管理服务
 │   ├── collector-service/             # 数据采集服务
@@ -99,6 +118,46 @@ skyi-monitor/
 ## 开发指南
 
 详细的开发指南请参阅 [开发文档](docs/README.md)。
+
+### Kafka 使用指南
+
+Kafka 作为系统的消息队列组件，用于实现采集服务和处理服务之间的数据传输，详细使用方法：
+
+1. **启动 Kafka**
+   ```
+   cd infrastructure/kafka
+   ./start-kafka.sh
+   ```
+
+2. **创建测试主题**
+   ```
+   ./create-topics.sh
+   ```
+
+3. **测试消息发送和接收**
+   ```
+   # 打包工具
+   ./package-utils.sh
+   
+   # 使用打包好的工具
+   cd target
+   unzip kafka-utils-1.0.0.zip
+   cd kafka-utils-1.0.0
+   
+   # 运行消费者
+   ./run-consumer.sh
+   
+   # 新开一个终端，运行生产者
+   ./run-producer.sh
+   ```
+
+4. **停止 Kafka**
+   ```
+   cd infrastructure/kafka
+   ./stop-kafka.sh
+   ```
+
+详细的 Kafka 配置和使用指南请参阅 [Kafka 文档](infrastructure/kafka/README.md)。
 
 ## 贡献指南
 

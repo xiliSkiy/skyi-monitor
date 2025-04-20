@@ -44,9 +44,9 @@
         
         <el-form-item label="调度类型" prop="scheduleType">
           <el-radio-group v-model="scheduleForm.scheduleType">
-            <el-radio :label="1">固定频率</el-radio>
-            <el-radio :label="2">Cron表达式</el-radio>
-            <el-radio :label="3">一次性执行</el-radio>
+            <el-radio :value="1">固定频率</el-radio>
+            <el-radio :value="2">Cron表达式</el-radio>
+            <el-radio :value="3">一次性执行</el-radio>
           </el-radio-group>
         </el-form-item>
         

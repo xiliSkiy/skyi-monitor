@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Zookeeper服务
+  zookeeper:
+    image: zookeeper:3.7
+    container_name: skyi-zookeeper
+    restart: always
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+    ports:
+      - "2181:2181"
+    volumes:
+      - ../data/zookeeper/data:/data
+      - ../data/zookeeper/datalog:/datalog
+      - ../config/zookeeper.properties:/conf/zoo.cfg
+    networks:
+      - kafka-net
+
+  # Kafka服务
+  kafka:
+    image: confluentinc/cp-kafka:7.0.0
+    container_name: skyi-kafka
+    restart: always
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: "168"
+      KAFKA_MESSAGE_MAX_BYTES: "10485760"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+    ports:
+      - "9092:9092"
+    volumes:
+      - ../data/kafka:/var/lib/kafka/data
+      - ../config/server.properties:/etc/kafka/server.properties.template
+    networks:
+      - kafka-net
+
+  # Kafka管理界面
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: skyi-kafka-ui
+    restart: always
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: skyi-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "8080:8080"
+    networks:
+      - kafka-net
+
+networks:
+  kafka-net:
+    driver: bridge 

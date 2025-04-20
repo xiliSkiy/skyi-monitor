@@ -1,0 +1,39 @@
+# 带有模拟服务的开发环境配置
+spring:
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/skyi_visualization?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+  # Kafka配置
+  kafka:
+    bootstrap-servers: localhost:9092
+  # Nacos配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+# 时序数据库访问配置（指向本地模拟服务）
+skyi:
+  tsdb:
+    url: http://localhost:9004
+
+# 禁用真实InfluxDB连接
+influxdb:
+  enabled: false
+  url: http://localhost:8086
+  token: mock-token
+  org: skyi
+  bucket: monitoring
+
+# 日志级别
+logging:
+  level:
+    com.skyi: DEBUG
+    org.hibernate.SQL: DEBUG 

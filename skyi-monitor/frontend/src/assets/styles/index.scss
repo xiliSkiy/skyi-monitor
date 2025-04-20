@@ -11,6 +11,9 @@ html, body {
   font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #333;
+  font-size: 14px;
+  background-color: #f5f7fa;
 }
 
 #app {
@@ -65,4 +68,64 @@ html, body {
   --warning-color: #E6A23C;
   --danger-color: #F56C6C;
   --info-color: #909399;
+}
+
+/* 菜单样式增强 */
+.el-menu {
+  border-right: none !important;
+}
+
+.el-menu-item {
+  height: 56px !important;
+  line-height: 56px !important;
+}
+
+.el-menu--collapse .el-sub-menu__title span,
+.el-menu--collapse .el-sub-menu__title .el-sub-menu__icon-arrow {
+  display: none !important;
+}
+
+.el-menu--collapse .el-menu-item .el-icon,
+.el-menu--collapse .el-sub-menu__title .el-icon {
+  margin: 0 !important;
+}
+
+.el-menu-item.is-active {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background-color: var(--primary-color);
+  }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(144, 147, 153, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* 页面过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 } 

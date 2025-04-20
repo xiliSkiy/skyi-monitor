@@ -4,11 +4,11 @@ import { Asset, AssetQueryParams, ApiResponse, PaginationResult } from '@/types/
 /**
  * 创建资产
  * @param data 资产数据
- * @returns 
+ * @returns 创建结果
  */
-export function createAsset(data: Asset) {
+export function createAsset(data: Partial<Asset>) {
   return request<ApiResponse<Asset>>({
-    url: '/assets',
+    url: '/asset/assets',
     method: 'post',
     data
   })
@@ -18,11 +18,11 @@ export function createAsset(data: Asset) {
  * 更新资产
  * @param id 资产ID
  * @param data 资产数据
- * @returns 
+ * @returns 更新结果
  */
-export function updateAsset(id: number, data: Asset) {
+export function updateAsset(id: number | string, data: Partial<Asset>) {
   return request<ApiResponse<Asset>>({
-    url: `/assets/${id}`,
+    url: `/asset/assets/${id}`,
     method: 'put',
     data
   })
@@ -31,11 +31,11 @@ export function updateAsset(id: number, data: Asset) {
 /**
  * 删除资产
  * @param id 资产ID
- * @returns 
+ * @returns 删除结果
  */
-export function deleteAsset(id: number) {
+export function deleteAsset(id: number | string) {
   return request<ApiResponse<null>>({
-    url: `/assets/${id}`,
+    url: `/asset/assets/${id}`,
     method: 'delete'
   })
 }
@@ -43,11 +43,11 @@ export function deleteAsset(id: number) {
 /**
  * 根据ID获取资产
  * @param id 资产ID
- * @returns 
+ * @returns 资产详情
  */
-export function getAssetById(id: number) {
+export function getAssetById(id: number | string) {
   return request<ApiResponse<Asset>>({
-    url: `/assets/${id}`,
+    url: `/asset/assets/${id}`,
     method: 'get'
   })
 }
@@ -55,11 +55,11 @@ export function getAssetById(id: number) {
 /**
  * 根据编码获取资产
  * @param code 资产编码
- * @returns 
+ * @returns 资产信息
  */
 export function getAssetByCode(code: string) {
   return request<ApiResponse<Asset>>({
-    url: `/assets/code/${code}`,
+    url: `/asset/assets/code/${code}`,
     method: 'get'
   })
 }
@@ -67,11 +67,11 @@ export function getAssetByCode(code: string) {
 /**
  * 分页查询资产列表
  * @param params 查询参数
- * @returns 
+ * @returns 资产列表
  */
 export function listAssets(params: AssetQueryParams) {
   return request<ApiResponse<PaginationResult<Asset>>>({
-    url: '/assets',
+    url: '/api/asset/assets',
     method: 'get',
     params
   })
@@ -80,11 +80,11 @@ export function listAssets(params: AssetQueryParams) {
 /**
  * 根据类型查询资产列表
  * @param type 资产类型
- * @returns 
+ * @returns 资产列表
  */
 export function listAssetsByType(type: string) {
   return request<ApiResponse<Asset[]>>({
-    url: `/assets/type/${type}`,
+    url: `/api/asset/assets/type/${type}`,
     method: 'get'
   })
 }
@@ -92,11 +92,11 @@ export function listAssetsByType(type: string) {
 /**
  * 根据部门查询资产列表
  * @param department 部门
- * @returns 
+ * @returns 资产列表
  */
 export function listAssetsByDepartment(department: string) {
   return request<ApiResponse<Asset[]>>({
-    url: `/assets/department/${department}`,
+    url: `/api/asset/assets/department/${department}`,
     method: 'get'
   })
 }
@@ -104,11 +104,30 @@ export function listAssetsByDepartment(department: string) {
 /**
  * 根据负责人查询资产列表
  * @param owner 负责人
- * @returns 
+ * @returns 资产列表
  */
 export function listAssetsByOwner(owner: string) {
   return request<ApiResponse<Asset[]>>({
-    url: `/assets/owner/${owner}`,
+    url: `/api/asset/assets/owner/${owner}`,
     method: 'get'
+  })
+}
+
+/**
+ * 获取资产列表
+ * @param params 查询参数
+ * @returns 资产列表
+ */
+export function getAssets(params: {
+  pageNum?: number
+  pageSize?: number
+  name?: string
+  type?: string
+  status?: number
+}) {
+  return request<ApiResponse<PaginationResult<Asset>>>({
+    url: '/api/asset/assets',
+    method: 'get',
+    params
   })
 } 

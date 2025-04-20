@@ -1,0 +1,22 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="200" fill="#f5f5f5" />
+  <rect x="50" y="50" width="30" height="30" fill="#313695" />
+  <rect x="80" y="50" width="30" height="30" fill="#4575b4" />
+  <rect x="110" y="50" width="30" height="30" fill="#74add1" />
+  <rect x="140" y="50" width="30" height="30" fill="#abd9e9" />
+  <rect x="170" y="50" width="30" height="30" fill="#e0f3f8" />
+  <rect x="200" y="50" width="30" height="30" fill="#ffffbf" />
+  <rect x="50" y="80" width="30" height="30" fill="#4575b4" />
+  <rect x="80" y="80" width="30" height="30" fill="#74add1" />
+  <rect x="110" y="80" width="30" height="30" fill="#abd9e9" />
+  <rect x="140" y="80" width="30" height="30" fill="#e0f3f8" />
+  <rect x="170" y="80" width="30" height="30" fill="#ffffbf" />
+  <rect x="200" y="80" width="30" height="30" fill="#fee090" />
+  <rect x="50" y="110" width="30" height="30" fill="#74add1" />
+  <rect x="80" y="110" width="30" height="30" fill="#abd9e9" />
+  <rect x="110" y="110" width="30" height="30" fill="#e0f3f8" />
+  <rect x="140" y="110" width="30" height="30" fill="#ffffbf" />
+  <rect x="170" y="110" width="30" height="30" fill="#fee090" />
+  <rect x="200" y="110" width="30" height="30" fill="#fdae61" />
+  <text x="150" y="30" font-family="Arial" font-size="14" text-anchor="middle">热力图</text>
+</svg> 

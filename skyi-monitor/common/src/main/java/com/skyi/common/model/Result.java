@@ -71,4 +71,27 @@ public class Result<T> {
     public static <T> Result<T> error(String message) {
         return error(500, message);
     }
+    
+    /**
+     * 失败响应，等同于error方法，提供兼容性
+     *
+     * @param code 状态码
+     * @param message 消息
+     * @param <T> 数据类型
+     * @return 响应结果
+     */
+    public static <T> Result<T> fail(Integer code, String message) {
+        return error(code, message);
+    }
+    
+    /**
+     * 失败响应（状态码默认500），等同于error方法，提供兼容性
+     *
+     * @param message 消息
+     * @param <T> 数据类型
+     * @return 响应结果
+     */
+    public static <T> Result<T> fail(String message) {
+        return error(500, message);
+    }
 } 

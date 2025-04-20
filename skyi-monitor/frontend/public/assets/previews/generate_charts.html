@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>生成图表预览图</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        .chart-container {
+            width: 300px;
+            height: 200px;
+            margin: 20px;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="line-chart" class="chart-container"></div>
+    <div id="bar-chart" class="chart-container"></div>
+    <div id="pie-chart" class="chart-container"></div>
+    <div id="table" class="chart-container">
+        <table border="1" style="width: 100%; height: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>数值</th>
+                    <th>变化</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>服务器1</td>
+                    <td>82.5%</td>
+                    <td>↑ 5.2%</td>
+                </tr>
+                <tr>
+                    <td>服务器2</td>
+                    <td>63.1%</td>
+                    <td>↓ 2.7%</td>
+                </tr>
+                <tr>
+                    <td>服务器3</td>
+                    <td>91.2%</td>
+                    <td>↑ 10.8%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="gauge" class="chart-container"></div>
+    <div id="heatmap" class="chart-container"></div>
+
+    <script>
+        // 折线图
+        var lineChart = echarts.init(document.getElementById('line-chart'));
+        lineChart.setOption({
+            title: {
+                text: '折线图示例'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: [150, 230, 224, 218, 135, 147, 260],
+                type: 'line'
+            }]
+        });
+
+        // 柱状图
+        var barChart = echarts.init(document.getElementById('bar-chart'));
+        barChart.setOption({
+            title: {
+                text: '柱状图示例'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: [120, 200, 150, 80, 70, 110, 130],
+                type: 'bar'
+            }]
+        });
+
+        // 饼图
+        var pieChart = echarts.init(document.getElementById('pie-chart'));
+        pieChart.setOption({
+            title: {
+                text: '饼图示例'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            series: [{
+                type: 'pie',
+                radius: '50%',
+                data: [
+                    { value: 1048, name: '搜索引擎' },
+                    { value: 735, name: '直接访问' },
+                    { value: 580, name: '邮件营销' },
+                    { value: 484, name: '联盟广告' },
+                    { value: 300, name: '视频广告' }
+                ]
+            }]
+        });
+
+        // 仪表盘
+        var gaugeChart = echarts.init(document.getElementById('gauge'));
+        gaugeChart.setOption({
+            title: {
+                text: '仪表盘示例'
+            },
+            series: [{
+                type: 'gauge',
+                progress: {
+                    show: true
+                },
+                detail: {
+                    valueAnimation: true,
+                    formatter: '{value}%'
+                },
+                data: [{
+                    value: 70,
+                    name: 'CPU使用率'
+                }]
+            }]
+        });
+
+        // 热力图
+        var heatmapChart = echarts.init(document.getElementById('heatmap'));
+        var hours = ['12a', '1a', '2a', '3a', '4a', '5a', '6a', '7a', '8a', '9a', '10a', '11a',
+            '12p', '1p', '2p', '3p', '4p', '5p', '6p', '7p', '8p', '9p', '10p', '11p'];
+        var days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        var data = [[0, 0, 5], [0, 1, 1], [0, 2, 0], [0, 3, 0], [0, 4, 0], [0, 5, 0], [0, 6, 0], [0, 7, 0], [0, 8, 0], [0, 9, 0], [0, 10, 0], [0, 11, 2], [0, 12, 4], [0, 13, 1], [0, 14, 1], [0, 15, 3], [0, 16, 4], [0, 17, 6], [0, 18, 4], [0, 19, 4], [0, 20, 3], [0, 21, 3], [0, 22, 2], [0, 23, 5], [1, 0, 7], [1, 1, 0], [1, 2, 0], [1, 3, 0], [1, 4, 0], [1, 5, 0], [1, 6, 0], [1, 7, 0], [1, 8, 0], [1, 9, 0], [1, 10, 5], [1, 11, 2], [1, 12, 2], [1, 13, 6], [1, 14, 9], [1, 15, 11], [1, 16, 6], [1, 17, 7], [1, 18, 8], [1, 19, 12], [1, 20, 5], [1, 21, 5], [1, 22, 7], [1, 23, 2], [2, 0, 1], [2, 1, 1], [2, 2, 0], [2, 3, 0], [2, 4, 0], [2, 5, 0], [2, 6, 0], [2, 7, 0], [2, 8, 0], [2, 9, 0], [2, 10, 3], [2, 11, 2], [2, 12, 1], [2, 13, 9], [2, 14, 8], [2, 15, 10], [2, 16, 6], [2, 17, 5], [2, 18, 5], [2, 19, 5], [2, 20, 7], [2, 21, 4], [2, 22, 2], [2, 23, 4], [3, 0, 7], [3, 1, 3], [3, 2, 0], [3, 3, 0], [3, 4, 0], [3, 5, 0], [3, 6, 0], [3, 7, 0], [3, 8, 1]];
+        heatmapChart.setOption({
+            title: {
+                text: '热力图示例'
+            },
+            tooltip: {
+                position: 'top'
+            },
+            grid: {
+                height: '50%',
+                top: '10%'
+            },
+            xAxis: {
+                type: 'category',
+                data: hours,
+                splitArea: {
+                    show: true
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: days,
+                splitArea: {
+                    show: true
+                }
+            },
+            visualMap: {
+                min: 0,
+                max: 10,
+                calculable: true,
+                orient: 'horizontal',
+                left: 'center',
+                bottom: '15%'
+            },
+            series: [{
+                name: '访问量',
+                type: 'heatmap',
+                data: data,
+                label: {
+                    show: false
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }]
+        });
+
+        // 保存为图片的提示
+        document.write('<div style="clear:both; padding: 20px;">请使用浏览器开发工具截图或者使用屏幕截图工具保存每个图表为图片文件</div>');
+    </script>
+</body>
+</html> 

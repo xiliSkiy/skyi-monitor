@@ -1,0 +1,105 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /processor
+
+spring:
+  application:
+    name: processor-service
+  
+  # 注释掉配置导入，直接使用本地配置
+  # config:
+  #   import: "optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}"
+  
+  # Kafka配置
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: processor-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500
+      fetch-max-wait: 500
+      enable-auto-commit: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: 1
+      retries: 3
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
+      concurrency: 3
+      
+  # 服务注册与配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+        enabled: ${NACOS_ENABLED:false}  # 默认禁用Nacos服务发现，便于本地开发
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        file-extension: yml
+        namespace: ${NACOS_NAMESPACE:public}
+        enabled: ${NACOS_ENABLED:false}  # 默认禁用Nacos配置中心，便于本地开发
+
+# 数据处理服务特有配置
+processor:
+  # 采集数据主题配置
+  kafka:
+    topics:
+      metric-data: collector-metric-data
+      collection-status: collector-status
+  # 存储配置
+  storage:
+    influxdb:
+      url: ${INFLUXDB_URL:http://localhost:8086}
+      token: ${INFLUXDB_TOKEN:processor-service-token}
+      org: ${INFLUXDB_ORG:skyi}
+      bucket: ${INFLUXDB_BUCKET:metrics}
+      batch-size: 5000
+      flush-interval: 1000
+  # 数据处理配置
+  processing:
+    aggregation-interval: 60  # 聚合间隔(秒)
+    retention-policies:
+      raw: 7d   # 原始数据保留7天
+      1m: 30d   # 1分钟聚合数据保留30天
+      5m: 90d   # 5分钟聚合数据保留90天
+      1h: 365d  # 1小时聚合数据保留1年
+    thread-pool:
+      core-size: 5
+      max-size: 10
+      queue-capacity: 500
+      keep-alive: 60
+
+# OpenFeign配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.skyi: DEBUG
+    org.springframework.kafka: INFO
+    
+# 指标监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true 

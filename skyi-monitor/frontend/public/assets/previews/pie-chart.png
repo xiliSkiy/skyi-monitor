@@ -1,0 +1,9 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="200" fill="#f5f5f5" />
+  <circle cx="150" cy="100" r="70" fill="none" stroke="#333" stroke-width="1" />
+  <path d="M150,100 L150,30 A70,70 0 0,1 213,118 z" fill="#5470c6" />
+  <path d="M150,100 L213,118 A70,70 0 0,1 150,170 z" fill="#91cc75" />
+  <path d="M150,100 L150,170 A70,70 0 0,1 87,118 z" fill="#fac858" />
+  <path d="M150,100 L87,118 A70,70 0 0,1 150,30 z" fill="#ee6666" />
+  <text x="150" y="30" font-family="Arial" font-size="14" text-anchor="middle">饼图</text>
+</svg> 

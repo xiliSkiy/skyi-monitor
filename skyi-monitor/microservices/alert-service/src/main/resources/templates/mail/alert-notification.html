@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>监控告警通知</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .alert-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .alert-header {
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+        }
+        .alert-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        .alert-body {
+            padding: 20px;
+        }
+        .alert-severity {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: white;
+        }
+        .severity-critical {
+            background-color: #d9534f;
+        }
+        .severity-warning {
+            background-color: #f0ad4e;
+        }
+        .severity-info {
+            background-color: #5bc0de;
+        }
+        .alert-info {
+            margin-bottom: 20px;
+        }
+        .alert-info p {
+            margin: 5px 0;
+        }
+        .alert-info strong {
+            display: inline-block;
+            width: 100px;
+        }
+        .alert-footer {
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="alert-container">
+        <div class="alert-header">
+            <h2>监控告警通知</h2>
+        </div>
+        <div class="alert-body">
+            <div class="alert-info">
+                <p>
+                    <strong>告警名称:</strong>
+                    <span th:text="${alert.name}">CPU使用率过高</span>
+                </p>
+                <p>
+                    <strong>告警级别:</strong>
+                    <span th:class="'alert-severity severity-' + ${#strings.toLowerCase(alert.severity)}" 
+                          th:text="${alert.severity}">CRITICAL</span>
+                </p>
+                <p>
+                    <strong>告警内容:</strong>
+                    <span th:text="${alert.message}">主机CPU使用率达到95%，超过阈值80%</span>
+                </p>
+                <p>
+                    <strong>资产名称:</strong>
+                    <span th:text="${alert.assetName}">web-server-01</span>
+                </p>
+                <p>
+                    <strong>资产类型:</strong>
+                    <span th:text="${alert.assetType}">SERVER</span>
+                </p>
+                <p>
+                    <strong>指标名称:</strong>
+                    <span th:text="${alert.metricName}">system.cpu.usage</span>
+                </p>
+                <p>
+                    <strong>当前值:</strong>
+                    <span th:text="${alert.metricValue}">95%</span>
+                </p>
+                <p th:if="${alert.threshold != null}">
+                    <strong>阈值:</strong>
+                    <span th:text="${alert.threshold}">80%</span>
+                </p>
+                <p>
+                    <strong>告警时间:</strong>
+                    <span th:text="${#dates.format(alert.startTime, 'yyyy-MM-dd HH:mm:ss')}">2025-04-20 15:30:45</span>
+                </p>
+            </div>
+            <div>
+                <p><strong>请尽快处理该告警！</strong></p>
+            </div>
+        </div>
+        <div class="alert-footer">
+            <p>此邮件由SKYI监控平台自动发送，请勿回复。</p>
+            <p>如需帮助，请联系系统管理员。</p>
+        </div>
+    </div>
+</body>
+</html> 

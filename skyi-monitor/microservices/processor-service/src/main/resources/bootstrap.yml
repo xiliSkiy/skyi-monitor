@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: processor-service
+  config:
+    import: optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        file-extension: yml
+        namespace: ${NACOS_NAMESPACE:public}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        enable-remote-sync-config: true
+        extension-configs:
+          - data-id: common-config.yml
+            group: ${NACOS_GROUP:DEFAULT_GROUP}
+            refresh: true 

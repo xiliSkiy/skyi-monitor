@@ -52,48 +52,42 @@ const componentRegistry = {
   // 指标相关组件
   metric: {
     // 图表组件
-    'line-chart': () => import('./charts/LineChart.vue'),
-    'bar-chart': () => import('./charts/BarChart.vue'),
-    'pie-chart': () => import('./charts/PieChart.vue'),
-    'gauge-chart': () => import('./charts/GaugeChart.vue'),
+    'line-chart': () => import('@/components/charts/LineChart.vue'),
+    'bar-chart': () => import('@/components/charts/BarChart.vue'),
+    'pie-chart': () => import('@/components/charts/PieChart.vue'),
+    'gauge-chart': () => import('@/components/charts/GaugeChart.vue'),
     
     // 特定指标图表
-    'cpu-chart': () => import('./charts/metrics/CpuChart.vue'),
-    'memory-chart': () => import('./charts/metrics/MemoryChart.vue'),
-    'disk-chart': () => import('./charts/metrics/DiskChart.vue'),
-    'network-chart': () => import('./charts/metrics/NetworkChart.vue'),
-    
-    // 指标数据卡片
-    'metric-card': () => import('./metrics/MetricCard.vue'),
-    'metric-trend-card': () => import('./metrics/MetricTrendCard.vue')
+    'cpu-chart': () => import('@/components/charts/metrics/CpuChart.vue'),
+    'memory-chart': () => import('@/components/charts/metrics/MemoryChart.vue'),
+    'disk-chart': () => import('@/components/charts/metrics/DiskChart.vue'),
+    'network-chart': () => import('@/components/charts/metrics/NetworkChart.vue')
   },
   
   // 资产相关组件
   asset: {
-    'asset-card': () => import('./asset/AssetCard.vue'),
-    'asset-list': () => import('./asset/AssetList.vue'),
-    'asset-topology': () => import('./asset/AssetTopology.vue')
+    'asset-card': () => import('@/components/asset/AssetCard.vue'),
+    'asset-list': () => import('@/components/asset/AssetList.vue'),
+    'asset-topology': () => import('@/components/asset/AssetTopology.vue')
   },
   
   // 采集相关组件
   collector: {
-    'task-card': () => import('./collector/TaskCard.vue'),
-    'task-status': () => import('./collector/TaskStatus.vue'),
-    'schedule-calendar': () => import('./collector/ScheduleCalendar.vue')
+    'task-card': () => import('@/components/collector/TaskCard.vue'),
+    'task-status': () => import('@/components/collector/TaskStatus.vue'),
+    'schedule-calendar': () => import('@/components/collector/ScheduleCalendar.vue')
   },
   
   // 告警相关组件
   alert: {
-    'alert-card': () => import('./alert/AlertCard.vue'),
-    'alert-list': () => import('./alert/AlertList.vue'),
-    'alert-timeline': () => import('./alert/AlertTimeline.vue')
+    'alert-card': () => import('@/components/alert/AlertCard.vue'),
+    'alert-list': () => import('@/components/alert/AlertList.vue'),
+    'alert-timeline': () => import('@/components/alert/AlertTimeline.vue')
   },
   
   // 通用组件
   common: {
-    'data-table': () => import('./common/DataTable.vue'),
-    'status-badge': () => import('./common/StatusBadge.vue'),
-    'json-viewer': () => import('./common/JsonViewer.vue')
+    'dynamic-chart-loader': () => import('@/components/charts/DynamicChartLoader.vue')
   }
 };
 
@@ -107,13 +101,13 @@ const loadComponent = async () => {
   }
   
   // 查找组件映射
-  const categoryMap = componentRegistry[category];
+  const categoryMap = componentRegistry[category as keyof typeof componentRegistry];
   if (!categoryMap) {
     error.value = `未知的组件类别: ${category}`;
     return;
   }
   
-  const componentLoader = categoryMap[type];
+  const componentLoader = categoryMap[type as keyof typeof categoryMap];
   if (!componentLoader) {
     error.value = `未知的组件类型: ${type}`;
     return;

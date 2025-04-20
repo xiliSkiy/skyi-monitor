@@ -1,0 +1,123 @@
+server:
+  port: ${SERVER_PORT:9003}
+
+spring:
+  application:
+    name: alert-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/skyi_alert?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DATABASE:0}
+    timeout: 10000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+      group-id: ${spring.application.name}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.skyi.monitor.*"
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:alert@example.com}
+    password: ${MAIL_PASSWORD:password}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+# 告警配置
+alert:
+  notification:
+    # 告警通知渠道开关
+    channels:
+      email:
+        enabled: ${ALERT_EMAIL_ENABLED:true}
+        rate-limit: ${ALERT_EMAIL_RATE_LIMIT:5}  # 每分钟最大发送数
+        silence-period: ${ALERT_EMAIL_SILENCE_PERIOD:15}  # 沉默期（分钟）
+      sms:
+        enabled: ${ALERT_SMS_ENABLED:false}
+        rate-limit: ${ALERT_SMS_RATE_LIMIT:2}
+        silence-period: ${ALERT_SMS_SILENCE_PERIOD:30}
+      webhook:
+        enabled: ${ALERT_WEBHOOK_ENABLED:false}
+        rate-limit: ${ALERT_WEBHOOK_RATE_LIMIT:10}
+        silence-period: ${ALERT_WEBHOOK_SILENCE_PERIOD:5}
+      dingtalk:
+        enabled: ${ALERT_DINGTALK_ENABLED:false}
+        rate-limit: ${ALERT_DINGTALK_RATE_LIMIT:5}
+        silence-period: ${ALERT_DINGTALK_SILENCE_PERIOD:15}
+      weixin:
+        enabled: ${ALERT_WEIXIN_ENABLED:false}
+        rate-limit: ${ALERT_WEIXIN_RATE_LIMIT:5}
+        silence-period: ${ALERT_WEIXIN_SILENCE_PERIOD:15}
+    # 通知频率控制（单位：秒）
+    rate-limit:
+      default: 300
+      critical: 60
+    # 告警抑制时间（单位：秒）
+    silence-period: 1800
+  # 告警升级配置
+  escalation:
+    enabled: true
+    # 告警未处理升级间隔（单位：分钟）
+    intervals: ${ALERT_ESCALATION_INTERVALS:15,30,60}  # 分钟
+
+# OpenAPI配置
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.skyi.monitor: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# 时序数据库访问配置
+skyi:
+  tsdb:
+    url: ${TSDB_URL:http://localhost:9002}
+    api:
+      query: /api/v1/timeseries/query
+      metadata: /api/v1/metadata
+
+# InfluxDB配置
+influxdb:
+  enabled: ${INFLUXDB_ENABLED:false}
+  url: ${INFLUXDB_URL:http://localhost:8086}
+  token: ${INFLUXDB_TOKEN:your-token}
+  org: ${INFLUXDB_ORG:skyi}
+  bucket: ${INFLUXDB_BUCKET:metrics} 

@@ -1,0 +1,63 @@
+# 带有模拟服务的开发环境配置
+spring:
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/skyi_alert?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+  # Kafka配置
+  kafka:
+    bootstrap-servers: localhost:9092
+  # Nacos配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+# 时序数据库访问配置（指向本地模拟服务）
+skyi:
+  tsdb:
+    url: http://localhost:9003
+    mock:
+      enabled: true
+
+# 禁用真实InfluxDB连接
+influxdb:
+  enabled: false
+  url: http://localhost:8086
+  token: mock-token
+  org: skyi
+  bucket: monitoring
+
+# 告警配置
+alert:
+  # 启用模拟告警源
+  mock-source:
+    enabled: true
+    interval-seconds: 30
+  notification:
+    # 告警通知渠道开关（模拟环境仅启用控制台）
+    channels:
+      email: false
+      sms: false
+      webhook: false
+      dingtalk: false
+      weixin: false
+      console: true
+    # 通知频率控制（模拟环境缩短周期）
+    rate-limit:
+      default: 60
+      critical: 30
+    # 告警抑制时间（模拟环境缩短）
+    silence-period: 300
+
+# 日志级别
+logging:
+  level:
+    com.skyi: DEBUG
+    org.hibernate.SQL: DEBUG 
